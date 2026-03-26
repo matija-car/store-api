@@ -27,7 +27,6 @@
     </properties>
 
     <dependencies>
-        <!-- Spring Boot Starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -80,7 +79,6 @@
             <version>2.1.0</version>
         </dependency>
 
-        <!-- JWT - ISPRAVLJENA VERZIJA -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
