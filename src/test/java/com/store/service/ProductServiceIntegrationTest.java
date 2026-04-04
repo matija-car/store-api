@@ -6,6 +6,7 @@ import com.store.entity.Product;
 import com.store.exception.ResourceNotFoundException;
 import com.store.repository.CategoryRepository;
 import com.store.repository.ProductRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,13 @@ class ProductServiceIntegrationTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    // Potreban za rjesavanje Hibernate flush ordering problema:
+    // deleteAll() ne salje SQL odmah na H2 - Hibernate ga stavlja u red.
+    // Bez flush() + clear(), H2 dobiva INSERT('Electronics') prije DELETE,
+    // sto uzrokuje unique constraint violation na categories.name.
+    @Autowired
+    private EntityManager entityManager;
+
     private Category category;
     private ProductDto productDto;
 
@@ -42,6 +50,10 @@ class ProductServiceIntegrationTest {
     void setUp() {
         productRepository.deleteAll();
         categoryRepository.deleteAll();
+
+        // Forsiraj slanje pending DELETE SQL-ova na H2, pa ocisti session cache
+        entityManager.flush();
+        entityManager.clear();
 
         category = categoryRepository.save(new Category("Electronics"));
 
