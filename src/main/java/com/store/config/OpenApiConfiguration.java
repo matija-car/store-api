@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.OpenAPI;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -35,4 +37,11 @@ import org.springframework.context.annotation.Configuration;
         in = SecuritySchemeIn.HEADER
 )
 public class OpenApiConfiguration {
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .addServersItem(new io.swagger.v3.oas.models.servers.Server()
+                        .url("/")
+                        .description("Current server"));
+    }
 }
