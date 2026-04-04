@@ -41,7 +41,7 @@ public class OpenApiConfiguration {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .addServersItem(new io.swagger.v3.oas.models.servers.Server()
-                        .url("/")
+                        .url("/api")
                         .description("Current server"));
     }
 }
