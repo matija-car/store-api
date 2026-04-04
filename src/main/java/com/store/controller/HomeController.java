@@ -16,7 +16,7 @@ public class HomeController {
     public ApiInfo index() {
         return new ApiInfo(
                 "Store API",
-                "1.0.0",
+                "1.0.1",
                 "Online Store REST API",
                 "http://localhost:8080/api/swagger-ui.html"
         );
