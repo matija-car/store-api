@@ -6,9 +6,25 @@ A REST API for managing an online store — users, products, categories, and aut
 
 - Java 17 + Spring Boot 3.2
 - Spring Security + JWT
-- MySQL (Docker) / H2 (local dev)
+- MySQL (Docker / Railway) / H2 (local dev)
 - Flyway for migrations
 - Swagger UI for API docs
+
+## Live demo
+
+API is deployed on Railway and available at:
+
+```
+https://store-api-production-78a6.up.railway.app/api/swagger-ui/index.html
+```
+
+## CI/CD
+
+Every push to `main` triggers a GitHub Actions pipeline that:
+
+1. Runs all 45 tests (MockMvc + Spring integration tests)
+2. Builds a Docker image and pushes it to GitHub Container Registry
+3. Deploys to Railway automatically — only if all tests pass
 
 ## Getting started
 
@@ -77,12 +93,9 @@ src/
 Includes integration tests for services and controller tests with MockMvc.
 
 
-
->  JWT secret is hardcoded for demo purposes. In production, inject it via environment variable `JWT_SECRET`.
-
 > ### Planned features
->User addresses
-> 
->User profiles
-> 
->Product wishlist
+> User addresses
+>
+> User profiles
+>
+> Product wishlist
