@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -21,14 +22,17 @@ public class Product {
     private Long id;
 
     private String name;
-
     private String description;
-
     private BigDecimal price;
 
-    private Integer stockQuantity;
+    @Column(name = "category_id")
+    private Long categoryId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+
 }

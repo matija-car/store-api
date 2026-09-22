@@ -4,7 +4,7 @@ import com.store.entity.PasswordResetToken;
 import com.store.entity.User;
 import com.store.repository.PasswordResetTokenRepository;
 import com.store.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor; // <-- Promijenjeno iz AllArgsConstructor
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +21,7 @@ import java.util.Base64;
 import java.util.HexFormat;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor // <-- Zamijenjeno umjesto @AllArgsConstructor
 @Slf4j
 public class PasswordResetService {
 
