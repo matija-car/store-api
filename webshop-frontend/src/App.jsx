@@ -10,7 +10,7 @@ import Footer from './components/Footer';
 export default function App() {
     return (
         <Router>
-            <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col justify-between">
+            <div className="flex min-h-screen flex-col justify-between bg-ivory text-ink">
                 <div>
                     <Navbar />
                     <Routes>

@@ -50,8 +50,8 @@ export default function Cart() {
     if (cart.length === 0 && !successMessage) {
         return (
             <div className="container mx-auto px-4 py-16 text-center">
-                <h2 className="text-2xl font-serif text-stone-800 mb-4">Vaša košarica je prazna</h2>
-                <Link to="/" className="inline-block px-6 py-2 bg-stone-900 text-white rounded-md hover:bg-stone-800">
+                <h2 className="display-font mb-4 text-2xl text-stone-800">Vaša košarica je prazna</h2>
+                <Link to="/" className="inline-block rounded-lg bg-burgundy px-6 py-2 text-white hover:bg-burgundy-dark">
                     Pregledaj ponudu
                 </Link>
             </div>
@@ -61,7 +61,7 @@ export default function Cart() {
     return (
         <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8 lg:py-16">
             <p className="eyebrow mb-3">Vaš odabir</p>
-            <h1 className="display-font mb-8 text-4xl font-bold text-stone-900">Košarica</h1>
+            <h1 className="display-font mb-8 text-4xl font-bold text-ink">Košarica</h1>
 
             {successMessage && (
                 <div className="mb-6 p-4 bg-green-50 text-green-700 rounded border border-green-200 text-center">
@@ -77,7 +77,7 @@ export default function Cart() {
 
             {cart.length > 0 && (
                 <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-                    <div className="divide-y divide-stone-200 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+                    <div className="divide-y divide-amber-900/10 rounded-2xl border border-amber-900/10 bg-white p-6 shadow-sm">
                         {cart.map((item) => (
                             <div key={item.id} className="py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -85,29 +85,29 @@ export default function Cart() {
                                         <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover rounded" />
                                     )}
                                     <div>
-                                        <h3 className="font-semibold text-stone-900">{item.name}</h3>
+                                        <h3 className="font-semibold text-ink">{item.name}</h3>
                                         <p className="text-sm text-stone-500">{Number(item.price).toFixed(2)} €</p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-                                    <div className="flex items-center border border-stone-300 rounded">
+                                    <div className="flex items-center rounded border border-amber-900/15">
                                         <button
                                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                            className="px-3 py-1 hover:bg-stone-100"
+                                            className="px-3 py-1 hover:bg-cream"
                                         >
                                             -
                                         </button>
                                         <span className="px-3 py-1 font-medium">{item.quantity}</span>
                                         <button
                                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                            className="px-3 py-1 hover:bg-stone-100"
+                                            className="px-3 py-1 hover:bg-cream"
                                         >
                                             +
                                         </button>
                                     </div>
 
-                                    <p className="font-semibold text-stone-900 w-24 text-right">
+                                    <p className="w-24 text-right font-semibold text-ink">
                                         {(item.price * item.quantity).toFixed(2)} €
                                     </p>
 
@@ -122,7 +122,7 @@ export default function Cart() {
                         ))}
                     </div>
 
-                    <div className="rounded-2xl border border-stone-200 bg-[#f1ebe3] p-6">
+                    <div className="rounded-2xl border border-amber-900/10 bg-cream p-6">
                         <p className="eyebrow mb-2">Podaci za dostavu</p>
                         <div className="grid gap-3">
                             {[
@@ -136,13 +136,13 @@ export default function Cart() {
                         <div className="mt-6 flex items-center justify-between gap-4 border-t border-stone-300/70 pt-5">
                         <div>
                             <span className="text-stone-600">Ukupno: </span>
-                            <span className="text-2xl font-bold text-stone-900">{totalPrice.toFixed(2)} €</span>
+                            <span className="text-2xl font-bold text-ink">{totalPrice.toFixed(2)} €</span>
                         </div>
 
                         <button
                             onClick={handleCheckout}
                             disabled={loading}
-                            className="w-full sm:w-auto px-8 py-3 bg-stone-900 text-white rounded-md hover:bg-stone-800 transition disabled:opacity-50"
+                            className="w-full rounded-lg bg-burgundy px-8 py-3 text-white transition hover:bg-burgundy-dark disabled:opacity-50 sm:w-auto"
                         >
                             {loading ? 'Slanje...' : 'Završi narudžbu'}
                         </button>

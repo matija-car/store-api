@@ -24,7 +24,12 @@ export function AuthProvider({ children }) {
             const response = await API.post('/auth/login', { email, password });
             const authToken = response.data.token || response.data.accessToken;
             setToken(authToken);
-            setUser(response.data.user || { email });
+            setUser(response.data.user || {
+                id: response.data.id,
+                name: response.data.name,
+                email: response.data.email || email,
+                role: response.data.role,
+            });
             return { success: true };
         } catch (error) {
             return {

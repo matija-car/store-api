@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
     const [formData, setFormData] = useState({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         password: '',
     });
@@ -22,7 +23,11 @@ export default function Register() {
         setError('');
         setMessage('');
 
-        const res = await register(formData);
+        const res = await register({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            password: formData.password,
+        });
         if (res.success) {
             setMessage('Registracija uspješna! Možete se prijaviti.');
             setTimeout(() => navigate('/login'), 2000);
@@ -33,9 +38,9 @@ export default function Register() {
 
     return (
         <main className="mx-auto my-12 max-w-md px-5 sm:my-20">
-        <div className="rounded-[2rem] border border-stone-200 bg-white p-7 shadow-[0_20px_60px_rgba(63,45,31,0.08)] sm:p-10">
-        <p className="eyebrow mb-3 text-center">Postanite dio priče</p>
-        <h2 className="display-font mb-8 text-center text-4xl font-bold text-stone-900">Registracija</h2>
+        <div className="rounded-2xl border border-amber-900/10 bg-white p-7 shadow-lg sm:p-10">
+        <p className="eyebrow mb-3 text-center">Budite dio zajednice</p>
+        <h2 className="display-font mb-8 text-center text-4xl font-bold text-ink">Registracija</h2>
 
             {error && (
                 <div className="mb-4 p-3 bg-red-50 text-red-600 rounded text-sm text-center border border-red-200">
@@ -51,19 +56,31 @@ export default function Register() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">Ime</label>
+                    <label className="mb-1 block text-sm font-medium text-stone-700">Ime</label>
                     <input
                         type="text"
-                        name="name"
+                        name="firstName"
                         required
-                        value={formData.name}
+                        value={formData.firstName}
                         onChange={handleChange}
                         className="input-field"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">E-mail adresa</label>
+                    <label className="mb-1 block text-sm font-medium text-stone-700">Prezime</label>
+                    <input
+                        type="text"
+                        name="lastName"
+                        required
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        className="input-field"
+                    />
+                </div>
+
+                <div>
+                    <label className="mb-1 block text-sm font-medium text-stone-700">E-mail adresa</label>
                     <input
                         type="email"
                         name="email"
@@ -75,7 +92,7 @@ export default function Register() {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">Lozinka</label>
+                    <label className="mb-1 block text-sm font-medium text-stone-700">Lozinka</label>
                     <input
                         type="password"
                         name="password"
@@ -88,7 +105,7 @@ export default function Register() {
 
                 <button
                     type="submit"
-                    className="w-full rounded-full bg-stone-900 py-3.5 font-semibold text-white transition hover:bg-[#9a704b]"
+                    className="w-full rounded-lg bg-burgundy py-3.5 font-semibold text-white transition hover:bg-burgundy-dark"
                 >
                     Registriraj se
                 </button>
@@ -96,7 +113,7 @@ export default function Register() {
 
             <p className="mt-4 text-center text-sm text-stone-600">
                 Već imate račun?{' '}
-                <Link to="/login" className="text-stone-900 font-semibold hover:underline">
+                <Link to="/login" className="font-semibold text-burgundy hover:underline">
                     Prijavite se
                 </Link>
             </p>

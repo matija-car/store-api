@@ -1,15 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 export default function ProductCard({ product }) {
     const { addToCart } = useCart();
+    const [added, setAdded] = useState(false);
+
+    const handleAddToCart = () => {
+        addToCart(product);
+        setAdded(true);
+    };
+
+    useEffect(() => {
+        if (!added) return undefined;
+        const timeout = setTimeout(() => setAdded(false), 2000);
+        return () => clearTimeout(timeout);
+    }, [added]);
 
     return (
-        <article className="art-card group flex min-w-0 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white transition duration-300 hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-lg">
+        <article className="art-card group relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-amber-900/10 bg-white transition duration-300 hover:-translate-y-0.5 hover:border-gold/50 hover:shadow-lg">
             <div>
                 {/* Spremnik za sliku */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#eee8df]">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-cream">
                     {product.imageUrl ? (
                         <img
                             src={product.imageUrl}
@@ -27,7 +39,8 @@ export default function ProductCard({ product }) {
 
                 {/* Informacije o proizvodu */}
                 <div className="p-5">
-                    <h3 className="mb-1 truncate text-base font-semibold text-stone-900">
+                    <p className="eyebrow mb-2">Duhovni dar</p>
+                    <h3 className="display-font mb-1 truncate text-lg font-bold text-ink">
                         {product.name}
                     </h3>
                     <p className="mb-1 line-clamp-1 text-sm text-stone-500">
@@ -37,26 +50,27 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Cijena i Akcije */}
-            <div className="mt-auto flex items-center justify-between border-t border-stone-100 px-4 py-3">
-        <span className="text-lg font-bold text-stone-900">
+            <div className="mt-auto flex items-center justify-between border-t border-amber-900/10 px-4 py-3">
+        <span className="text-lg font-bold text-ink">
           {Number(product.price).toFixed(2)} €
         </span>
 
                 <div className="flex gap-2">
                     <Link
                         to={`/products/${product.id}`}
-                        className="rounded-lg border border-stone-200 px-3 py-2 text-xs font-semibold text-stone-700 transition hover:border-stone-900"
+                        className="rounded-lg border border-amber-900/15 px-3 py-2 text-xs font-semibold text-stone-700 transition hover:border-burgundy"
                     >
                         Pogledaj
                     </Link>
                     <button
-                        onClick={() => addToCart(product)}
-                        className="rounded-lg bg-stone-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#9a704b]"
+                        onClick={handleAddToCart}
+                        className={`rounded-lg bg-burgundy px-3 py-2 text-xs font-semibold text-white transition hover:bg-burgundy-dark ${added ? 'scale-95 animate-pulse' : ''}`}
                     >
-                        Dodaj
+                        {added ? 'Dodano' : 'Dodaj'}
                     </button>
                 </div>
             </div>
+            {added && <div className="absolute bottom-3 left-3 rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white shadow-lg">Dodano u košaricu</div>}
         </article>
     );
 }

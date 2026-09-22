@@ -4,6 +4,7 @@ import com.store.dto.AuthResponse;
 import com.store.dto.LoginRequest;
 import com.store.dto.RegisterUserRequest;
 import com.store.dto.UserDto;
+import com.store.entity.Role;
 import com.store.security.JwtTokenProvider;
 import com.store.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +37,7 @@ public class AuthController {
             UriComponentsBuilder uriComponentsBuilder) {
 
         UserDto createdUser = userService.createUser(registerRequest);
+        Role role = createdUser.getRole() == null ? Role.CUSTOMER : createdUser.getRole();
 
         var location = uriComponentsBuilder
                 .path("users/{id}")
@@ -46,6 +48,7 @@ public class AuthController {
                 .id(createdUser.getId())
                 .name(createdUser.getName())
                 .email(createdUser.getEmail())
+                .role(role)
                 .message("User registered successfully")
                 .build();
 
@@ -67,12 +70,22 @@ public class AuthController {
                             .build());
         }
 
-        String token = jwtTokenProvider.generateToken(loginRequest.getEmail());
+        UserDto user = userService.getUserByEmail(loginRequest.getEmail());
+        if (user == null) {
+            user = new UserDto(null, null, loginRequest.getEmail());
+        }
+        Role role = user.getRole() == null ? Role.CUSTOMER : user.getRole();
+        String token = role == Role.CUSTOMER
+                ? jwtTokenProvider.generateToken(loginRequest.getEmail())
+                : jwtTokenProvider.generateToken(loginRequest.getEmail(), role);
         log.info("User logged in successfully: {}", loginRequest.getEmail());
 
         AuthResponse response = AuthResponse.builder()
                 .token(token)
                 .email(loginRequest.getEmail())
+                .id(user.getId())
+                .name(user.getName())
+                .role(role)
                 .message("Login successful")
                 .build();
 

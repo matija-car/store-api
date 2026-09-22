@@ -1,5 +1,6 @@
 package com.store.dto;
 
+import com.store.entity.Role;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -23,4 +24,12 @@ public class UserDto {
 
     @Schema(description = "User email address", example = "john@example.com")
     private String email;
+
+    private Role role;
+
+    public UserDto(Long id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
 }

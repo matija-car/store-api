@@ -1,5 +1,6 @@
 package com.store.dto;
 
+import com.store.entity.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,8 @@ public class AuthResponse {
 
     @Schema(description = "User full name", example = "John Doe")
     private String name;
+
+    private Role role;
 
     @Schema(description = "Response message", example = "Login successful")
     private String message;
