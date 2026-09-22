@@ -1,0 +1,24 @@
+-- Refresh tokens (session/login tokens; not wired into the login flow yet)
+CREATE TABLE refresh_tokens (
+                                id          BIGINT AUTO_INCREMENT NOT NULL,
+                                token_hash  VARCHAR(255) NOT NULL UNIQUE,
+                                user_id     BIGINT       NOT NULL,
+                                expiry_date TIMESTAMP    NOT NULL,
+                                revoked     BOOLEAN      NOT NULL DEFAULT FALSE,
+                                CONSTRAINT pk_refresh_tokens PRIMARY KEY (id),
+                                CONSTRAINT fk_refresh_tokens_users FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+-- Password reset tokens
+CREATE TABLE password_reset_tokens (
+                                       id          BIGINT AUTO_INCREMENT NOT NULL,
+                                       token_hash  VARCHAR(255) NOT NULL UNIQUE,
+                                       user_id     BIGINT       NOT NULL,
+                                       expiry_date TIMESTAMP    NOT NULL,
+                                       used        BOOLEAN      NOT NULL DEFAULT FALSE,
+                                       CONSTRAINT pk_password_reset_tokens PRIMARY KEY (id),
+                                       CONSTRAINT fk_password_reset_tokens_users FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
+CREATE INDEX idx_password_reset_tokens_user_id ON password_reset_tokens(user_id);
