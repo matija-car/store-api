@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import API from '../api/axios';
 import ProductCard from '../components/ProductCard';
 
@@ -6,11 +6,21 @@ export default function Home() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [search, setSearch] = useState('');
+    const [sort, setSort] = useState('featured');
 
     useEffect(() => {
         API.get('/products')
             .then((response) => {
-                setProducts(response.data);
+                const products = Array.isArray(response.data)
+                    ? response.data
+                    : response.data.content;
+
+                if (!Array.isArray(products)) {
+                    throw new Error('Unexpected products response format');
+                }
+
+                setProducts(products);
                 setLoading(false);
             })
             .catch((err) => {
@@ -19,6 +29,11 @@ export default function Home() {
                 setLoading(false);
             });
     }, []);
+
+    const visibleProducts = useMemo(() => {
+        const filtered = products.filter((product) => `${product.name} ${product.description || ''}`.toLowerCase().includes(search.toLowerCase()));
+        return [...filtered].sort((a, b) => sort === 'price-low' ? Number(a.price) - Number(b.price) : sort === 'price-high' ? Number(b.price) - Number(a.price) : 0);
+    }, [products, search, sort]);
 
     if (loading) {
         return (
@@ -37,25 +52,27 @@ export default function Home() {
     }
 
     return (
-        <main className="container mx-auto px-4 py-8">
-            <header className="text-center mb-10">
-                <h1 className="text-4xl font-serif font-bold text-stone-900 mb-2">
-                    Umjetnička Galerija
-                </h1>
-                <p className="text-stone-600">
-                    Originalne ručno rađene slike i skulpture
-                </p>
-            </header>
-
-            {products.length === 0 ? (
-                <p className="text-center text-stone-500">Trenutno nema dostupnih djela.</p>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {products.map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                    ))}
+        <main>
+            <section className="border-b border-stone-200 bg-[#f1ebe3] px-4 py-10 sm:px-8">
+                <div className="mx-auto max-w-7xl">
+                    <p className="eyebrow mb-3">Atelier Gallery</p>
+                    <h1 className="display-font text-4xl font-bold text-stone-900 sm:text-5xl">Pronađite nešto posebno.</h1>
+                    <p className="mt-3 max-w-xl text-stone-500">Originalni radovi za vaš dom, pažljivo odabrani i spremni za novu priču.</p>
                 </div>
-            )}
+            </section>
+            <section id="collection" className="mx-auto max-w-7xl px-4 py-8 sm:px-8 lg:py-12">
+                <div className="mb-8 flex flex-col gap-4 border-b border-stone-200 pb-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div><h2 className="text-xl font-bold text-stone-900">Svi proizvodi</h2><p className="mt-1 text-sm text-stone-500">{visibleProducts.length} artikala</p></div>
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                        <label className="relative"><span className="sr-only">Pretraži proizvode</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pretraži proizvode..." className="input-field w-full sm:w-64" /></label>
+                        <select value={sort} onChange={(e) => setSort(e.target.value)} className="input-field w-full sm:w-48"><option value="featured">Preporučeno</option><option value="price-low">Cijena: niža → viša</option><option value="price-high">Cijena: viša → niža</option></select>
+                    </div>
+                </div>
+                {visibleProducts.length === 0 ? <div className="rounded-xl border border-dashed border-stone-300 py-20 text-center text-stone-500">Nema proizvoda koji odgovaraju pretrazi.</div> : <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{visibleProducts.map((product) => <ProductCard key={product.id} product={product} />)}</div>}
+            </section>
+            <section id="about" className="border-t border-stone-200 bg-white px-4 py-10 sm:px-8">
+                <div className="mx-auto grid max-w-7xl gap-4 text-sm text-stone-500 sm:grid-cols-3"><p><strong className="text-stone-900">Pažljivo pakiranje</strong><br />Svaki artikl stiže sigurno zapakiran.</p><p><strong className="text-stone-900">Jedinstveni radovi</strong><br />Originalni komadi za vaš prostor.</p><p><strong className="text-stone-900">Podrška kupcima</strong><br />Tu smo za sva pitanja prije kupnje.</p></div>
+            </section>
         </main>
     );
 }

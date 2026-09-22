@@ -1,36 +1,27 @@
 package com.store.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
-
-@Getter
-@Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "categories")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
+    private Long id;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "category")
-    private Set<Product> products = new HashSet<>();
+    private String description;
 
     public Category(String name) {
         this.name = name;
-    }
-
-    public Category(Integer id) {
-        this.id = id;
     }
 }

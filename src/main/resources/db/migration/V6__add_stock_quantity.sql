@@ -1,0 +1,2 @@
+ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS stock_quantity INT NOT NULL DEFAULT 0;

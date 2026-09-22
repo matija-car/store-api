@@ -5,6 +5,7 @@ import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Footer from './components/Footer';
 
 export default function App() {
     return (
@@ -20,9 +21,7 @@ export default function App() {
                         <Route path="/register" element={<Register />} />
                     </Routes>
                 </div>
-                <footer className="text-center py-6 text-sm text-stone-500 border-t border-stone-200">
-                    © 2026 Art Gallery. Sva prava pridržana.
-                </footer>
+                <Footer />
             </div>
         </Router>
     );

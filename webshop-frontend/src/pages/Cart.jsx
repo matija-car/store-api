@@ -12,6 +12,7 @@ export default function Cart() {
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [customer, setCustomer] = useState({ customerName: '', customerEmail: '', shippingAddress: '', city: '', postalCode: '' });
 
     const handleCheckout = async () => {
         if (!token) {
@@ -26,6 +27,7 @@ export default function Cart() {
 
         try {
             const orderPayload = {
+                ...customer,
                 items: cart.map((item) => ({
                     productId: item.id,
                     quantity: item.quantity,
@@ -57,8 +59,9 @@ export default function Cart() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-12 max-w-4xl">
-            <h1 className="text-3xl font-serif font-bold text-stone-900 mb-8">Košarica</h1>
+        <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8 lg:py-16">
+            <p className="eyebrow mb-3">Vaš odabir</p>
+            <h1 className="display-font mb-8 text-4xl font-bold text-stone-900">Košarica</h1>
 
             {successMessage && (
                 <div className="mb-6 p-4 bg-green-50 text-green-700 rounded border border-green-200 text-center">
@@ -73,8 +76,8 @@ export default function Cart() {
             )}
 
             {cart.length > 0 && (
-                <div className="space-y-6">
-                    <div className="divide-y divide-stone-200 bg-white rounded-lg border border-stone-200 p-6 shadow-sm">
+                <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+                    <div className="divide-y divide-stone-200 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
                         {cart.map((item) => (
                             <div key={item.id} className="py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -119,7 +122,18 @@ export default function Cart() {
                         ))}
                     </div>
 
-                    <div className="bg-stone-50 p-6 rounded-lg border border-stone-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div className="rounded-2xl border border-stone-200 bg-[#f1ebe3] p-6">
+                        <p className="eyebrow mb-2">Podaci za dostavu</p>
+                        <div className="grid gap-3">
+                            {[
+                                ['customerName', 'Ime i prezime', 'text'],
+                                ['customerEmail', 'E-mail adresa', 'email'],
+                                ['shippingAddress', 'Adresa dostave', 'text'],
+                                ['city', 'Grad', 'text'],
+                                ['postalCode', 'Poštanski broj', 'text'],
+                            ].map(([name, label, type]) => <input key={name} required type={type} placeholder={label} value={customer[name]} onChange={(e) => setCustomer({ ...customer, [name]: e.target.value })} className="input-field" />)}
+                        </div>
+                        <div className="mt-6 flex items-center justify-between gap-4 border-t border-stone-300/70 pt-5">
                         <div>
                             <span className="text-stone-600">Ukupno: </span>
                             <span className="text-2xl font-bold text-stone-900">{totalPrice.toFixed(2)} €</span>
@@ -132,9 +146,10 @@ export default function Cart() {
                         >
                             {loading ? 'Slanje...' : 'Završi narudžbu'}
                         </button>
+                        </div>
                     </div>
                 </div>
             )}
-        </div>
+        </main>
     );
 }

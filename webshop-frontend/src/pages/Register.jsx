@@ -4,8 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
+        name: '',
         email: '',
         password: '',
     });
@@ -33,8 +32,10 @@ export default function Register() {
     };
 
     return (
-        <div className="max-w-md mx-auto my-12 p-6 bg-white rounded-lg shadow-md border border-stone-200">
-            <h2 className="text-2xl font-serif font-bold text-center text-stone-900 mb-6">Registracija</h2>
+        <main className="mx-auto my-12 max-w-md px-5 sm:my-20">
+        <div className="rounded-[2rem] border border-stone-200 bg-white p-7 shadow-[0_20px_60px_rgba(63,45,31,0.08)] sm:p-10">
+        <p className="eyebrow mb-3 text-center">Postanite dio priče</p>
+        <h2 className="display-font mb-8 text-center text-4xl font-bold text-stone-900">Registracija</h2>
 
             {error && (
                 <div className="mb-4 p-3 bg-red-50 text-red-600 rounded text-sm text-center border border-red-200">
@@ -53,23 +54,11 @@ export default function Register() {
                     <label className="block text-sm font-medium text-stone-700 mb-1">Ime</label>
                     <input
                         type="text"
-                        name="firstName"
+                        name="name"
                         required
-                        value={formData.firstName}
+                        value={formData.name}
                         onChange={handleChange}
-                        className="w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">Prezime</label>
-                    <input
-                        type="text"
-                        name="lastName"
-                        required
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500"
+                        className="input-field"
                     />
                 </div>
 
@@ -81,7 +70,7 @@ export default function Register() {
                         required
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500"
+                        className="input-field"
                     />
                 </div>
 
@@ -93,13 +82,13 @@ export default function Register() {
                         required
                         value={formData.password}
                         onChange={handleChange}
-                        className="w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500"
+                        className="input-field"
                     />
                 </div>
 
                 <button
                     type="submit"
-                    className="w-full py-2 bg-stone-900 text-white rounded-md hover:bg-stone-800 transition"
+                    className="w-full rounded-full bg-stone-900 py-3.5 font-semibold text-white transition hover:bg-[#9a704b]"
                 >
                     Registriraj se
                 </button>
@@ -112,5 +101,6 @@ export default function Register() {
                 </Link>
             </p>
         </div>
+        </main>
     );
 }

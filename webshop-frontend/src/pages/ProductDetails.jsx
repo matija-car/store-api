@@ -30,7 +30,7 @@ export default function ProductDetails() {
     if (!product) return null;
 
     return (
-        <div className="container mx-auto px-4 py-12">
+        <main className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:py-16">
             <button
                 onClick={() => navigate(-1)}
                 className="mb-6 text-sm text-stone-600 hover:text-stone-900 flex items-center gap-1"
@@ -38,13 +38,13 @@ export default function ProductDetails() {
                 ← Natrag
             </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-white p-8 rounded-lg border border-stone-200 shadow-sm">
-                <div className="aspect-square w-full bg-stone-100 rounded-lg overflow-hidden">
+            <div className="grid overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white shadow-[0_20px_60px_rgba(63,45,31,0.08)] md:grid-cols-2">
+                <div className="aspect-square w-full overflow-hidden bg-[#eee8df]">
                     {product.imageUrl ? (
                         <img
                             src={product.imageUrl}
                             alt={product.name}
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover transition duration-700 hover:scale-105"
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-stone-400">
@@ -53,25 +53,30 @@ export default function ProductDetails() {
                     )}
                 </div>
 
-                <div className="flex flex-col justify-between">
+                <div className="flex flex-col justify-between p-7 sm:p-12">
                     <div>
-                        <h1 className="text-3xl font-serif font-bold text-stone-900 mb-4">{product.name}</h1>
-                        <p className="text-2xl font-semibold text-stone-800 mb-6">
+                        <p className="eyebrow mb-4">Originalni umjetnički rad</p>
+                        <h1 className="display-font mb-5 text-4xl font-bold leading-tight text-stone-900 sm:text-5xl">{product.name}</h1>
+                        <p className="mb-8 text-3xl font-bold text-[#9a704b]">
                             {Number(product.price).toFixed(2)} €
                         </p>
-                        <p className="text-stone-600 mb-6 leading-relaxed">
+                        <p className="mb-8 max-w-lg leading-8 text-stone-500">
                             {product.description || 'Nema opisa za ovaj artikl.'}
                         </p>
                     </div>
 
+                    <div className="mb-8 grid grid-cols-2 gap-3 border-y border-stone-200 py-5 text-sm">
+                        <div><p className="text-stone-400">Dostupnost</p><p className="mt-1 font-semibold text-stone-800">{product.stockQuantity === 1 ? 'Jedinstven primjerak' : 'Dostupno za narudžbu'}</p></div>
+                        <div><p className="text-stone-400">Kategorija</p><p className="mt-1 font-semibold text-stone-800">{product.categoryName || 'Umjetnost'}</p></div>
+                    </div>
                     <button
                         onClick={() => addToCart(product)}
-                        className="w-full py-3 bg-stone-900 text-white font-medium rounded-md hover:bg-stone-800 transition"
+                        className="w-full rounded-full bg-stone-900 py-4 font-semibold text-white transition hover:bg-[#9a704b]"
                     >
                         Dodaj u košaricu
                     </button>
                 </div>
             </div>
-        </div>
+            </main>
     );
 }
