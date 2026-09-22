@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -28,7 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DisplayName("ProductController Tests")
 class ProductControllerTest {
@@ -94,6 +95,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("Should create product successfully")
     void testCreateProductSuccess() throws Exception {
         ProductDto createdProduct = new ProductDto(1L, "Laptop", new BigDecimal("999.99"), "High performance laptop for developers", 1);
@@ -110,6 +112,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("Should update product")
     void testUpdateProduct() throws Exception {
         ProductDto updatedProduct = new ProductDto(1L, "Laptop Pro", new BigDecimal("1299.99"), "High performance laptop", 1);
@@ -125,6 +128,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("Should delete product")
     void testDeleteProduct() throws Exception {
         mockMvc.perform(delete("/products/1")

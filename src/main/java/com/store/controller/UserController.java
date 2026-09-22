@@ -117,7 +117,7 @@ public class UserController {
             return;
         }
 
-        String currentEmail = (String) authentication.getPrincipal();
+        String currentEmail = authentication.getName();
         UserDto currentUser = userService.getUserByEmail(currentEmail);
         if (!currentUser.getId().equals(userId)) {
             log.warn("User {} attempted to modify resource belonging to user id {}", currentEmail, userId);

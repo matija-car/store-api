@@ -6,7 +6,6 @@ import com.store.dto.UpdateUserRequest;
 import com.store.dto.UserDto;
 import com.store.exception.ResourceNotFoundException;
 import com.store.service.UserService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -18,15 +17,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -34,8 +29,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
+@WithMockUser(username = "john@example.com", roles = "CUSTOMER")
 @DisplayName("UserController Tests")
 class UserControllerTest {
 
@@ -58,17 +54,10 @@ class UserControllerTest {
         updateRequest = new UpdateUserRequest("John Doe", "john@example.com");
         johnDto = new UserDto(1L, "John Doe", "john@example.com");
 
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("john@example.com", null, Collections.emptyList())
-        );
-    }
-
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("Should create user successfully")
     void testCreateUserSuccess() throws Exception {
         when(userService.createUser(any(RegisterUserRequest.class))).thenReturn(johnDto);
@@ -85,6 +74,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("Should get all users")
     void testGetAllUsers() throws Exception {
         Page<UserDto> page = new PageImpl<>(Arrays.asList(johnDto), PageRequest.of(0, 20), 1);
@@ -169,13 +159,9 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("Should return 404 for non-existent user")
     void testGetUserNotFound() throws Exception {
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        "admin@example.com",
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
         when(userService.getUserById(999L))
                 .thenThrow(new ResourceNotFoundException("User not found with id: 999"));
 
