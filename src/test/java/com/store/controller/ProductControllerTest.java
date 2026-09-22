@@ -2,6 +2,7 @@ package com.store.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.store.dto.ProductDto;
+import com.store.dto.ProductRequestDTO;
 import com.store.exception.ResourceNotFoundException;
 import com.store.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,11 +42,17 @@ class ProductControllerTest {
     @MockBean
     private ProductService productService;
 
-    private ProductDto productDto;
+    private ProductRequestDTO productDto;
 
     @BeforeEach
     void setUp() {
-        productDto = new ProductDto(null, "Laptop", new BigDecimal("999.99"), "High performance laptop for developers", 1);
+        productDto = new ProductRequestDTO(
+                "Laptop",
+                "High performance laptop for developers",
+                new BigDecimal("999.99"),
+                null,
+                null,
+                1L);
     }
 
     @Test
@@ -90,7 +97,7 @@ class ProductControllerTest {
     @DisplayName("Should create product successfully")
     void testCreateProductSuccess() throws Exception {
         ProductDto createdProduct = new ProductDto(1L, "Laptop", new BigDecimal("999.99"), "High performance laptop for developers", 1);
-        when(productService.createProduct(any(ProductDto.class))).thenReturn(createdProduct);
+        when(productService.createProduct(any(ProductRequestDTO.class))).thenReturn(createdProduct);
 
         mockMvc.perform(post("/products")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -99,14 +106,14 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Laptop"));
 
-        verify(productService, times(1)).createProduct(any(ProductDto.class));
+        verify(productService, times(1)).createProduct(any(ProductRequestDTO.class));
     }
 
     @Test
     @DisplayName("Should update product")
     void testUpdateProduct() throws Exception {
         ProductDto updatedProduct = new ProductDto(1L, "Laptop Pro", new BigDecimal("1299.99"), "High performance laptop", 1);
-        when(productService.updateProduct(eq(1L), any(ProductDto.class))).thenReturn(updatedProduct);
+        when(productService.updateProduct(eq(1L), any(ProductRequestDTO.class))).thenReturn(updatedProduct);
 
         mockMvc.perform(put("/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -114,7 +121,7 @@ class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Laptop Pro"));
 
-        verify(productService, times(1)).updateProduct(eq(1L), any(ProductDto.class));
+        verify(productService, times(1)).updateProduct(eq(1L), any(ProductRequestDTO.class));
     }
 
     @Test

@@ -1,7 +1,9 @@
 package com.store.controller;
 
 import com.store.dto.ProductDto;
+import com.store.dto.ProductRequestDTO;
 import com.store.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,14 +34,16 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto) {
-        ProductDto created = productService.createProduct(productDto);
+    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductRequestDTO productRequest) {
+        ProductDto created = productService.createProduct(productRequest);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id, @RequestBody ProductDto productDto) {
-        ProductDto updated = productService.updateProduct(id, productDto);
+    public ResponseEntity<ProductDto> updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductRequestDTO productRequest) {
+        ProductDto updated = productService.updateProduct(id, productRequest);
         return ResponseEntity.ok(updated);
     }
 

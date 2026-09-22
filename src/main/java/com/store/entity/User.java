@@ -36,6 +36,7 @@ public class User {
     @Builder.Default
     private Role role = Role.CUSTOMER;
 
+    // TODO: Implement the email verification flow before using this flag.
     @Column(name = "email_verified", nullable = false)
     @Builder.Default
     private boolean emailVerified = false;

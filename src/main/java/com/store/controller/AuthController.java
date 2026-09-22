@@ -9,9 +9,11 @@ import com.store.dto.ResetPasswordRequest;
 import com.store.dto.UserDto;
 import com.store.entity.Role;
 import com.store.entity.User;
+import com.store.exception.RateLimitExceededException;
 import com.store.security.JwtTokenProvider;
 import com.store.service.PasswordResetService;
 import com.store.service.RefreshTokenService;
+import com.store.service.AuthRateLimiter;
 import com.store.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,6 +38,7 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
     private final PasswordResetService passwordResetService;
+    private final AuthRateLimiter authRateLimiter;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
@@ -42,7 +46,9 @@ public class AuthController {
     @ApiResponse(responseCode = "400", description = "Invalid input data or email already in use")
     public ResponseEntity<AuthResponse> register(
             @Valid @RequestBody RegisterUserRequest registerRequest,
-            UriComponentsBuilder uriComponentsBuilder) {
+            UriComponentsBuilder uriComponentsBuilder,
+            HttpServletRequest request) {
+        enforceRateLimit("register", request, registerRequest.getEmail());
 
         UserDto createdUser = userService.createUser(registerRequest);
         Role role = createdUser.getRole() == null ? Role.CUSTOMER : createdUser.getRole();
@@ -67,7 +73,10 @@ public class AuthController {
     @Operation(summary = "Login user and get JWT token")
     @ApiResponse(responseCode = "200", description = "Login successful")
     @ApiResponse(responseCode = "401", description = "Invalid credentials")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody LoginRequest loginRequest,
+            HttpServletRequest request) {
+        enforceRateLimit("login", request, loginRequest.getEmail());
         boolean isValid = userService.verifyCredentials(loginRequest.getEmail(), loginRequest.getPassword());
 
         if (!isValid) {
@@ -130,8 +139,11 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        passwordResetService.requestReset(request.getEmail());
+    public ResponseEntity<Void> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest,
+            HttpServletRequest request) {
+        enforceRateLimit("forgot-password", request, forgotPasswordRequest.getEmail());
+        passwordResetService.requestReset(forgotPasswordRequest.getEmail());
         return ResponseEntity.accepted().build();
     }
 
@@ -139,5 +151,12 @@ public class AuthController {
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
         return ResponseEntity.noContent().build();
+    }
+
+    private void enforceRateLimit(String endpoint, HttpServletRequest request, String email) {
+        if (!authRateLimiter.allow(endpoint, request.getRemoteAddr(), email)) {
+            throw new RateLimitExceededException(
+                    "Too many authentication requests. Please try again later.");
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.store.service;
 
 import com.store.dto.ProductDto;
+import com.store.dto.ProductRequestDTO;
 import com.store.entity.Category;
 import com.store.entity.Product;
 import com.store.exception.ResourceNotFoundException;
@@ -38,15 +39,18 @@ public class ProductService {
     }
 
     public ProductDto createProduct(ProductDto productDto) {
-        Category category = categoryRepository.findById(productDto.getCategoryId().longValue())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + productDto.getCategoryId()));
+        return createProduct(toRequest(productDto));
+    }
+
+    public ProductDto createProduct(ProductRequestDTO productRequest) {
+        Category category = findCategory(productRequest.getCategoryId());
 
         Product product = new Product();
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setPrice(productDto.getPrice());
-        product.setStockQuantity(productDto.getStockQuantity() == null ? 0 : productDto.getStockQuantity());
-        product.setImageUrl(productDto.getImageUrl());
+        product.setName(productRequest.getName());
+        product.setDescription(productRequest.getDescription());
+        product.setPrice(productRequest.getPrice());
+        product.setStockQuantity(productRequest.getStockQuantity() == null ? 0 : productRequest.getStockQuantity());
+        product.setImageUrl(productRequest.getImageUrl());
         product.setCategory(category);
 
         Product savedProduct = productRepository.save(product);
@@ -54,19 +58,22 @@ public class ProductService {
     }
 
     public ProductDto updateProduct(Long id, ProductDto productDto) {
+        return updateProduct(id, toRequest(productDto));
+    }
+
+    public ProductDto updateProduct(Long id, ProductRequestDTO productRequest) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
-        Category category = categoryRepository.findById(productDto.getCategoryId().longValue())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + productDto.getCategoryId()));
+        Category category = findCategory(productRequest.getCategoryId());
 
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setPrice(productDto.getPrice());
-        product.setStockQuantity(productDto.getStockQuantity() == null
+        product.setName(productRequest.getName());
+        product.setDescription(productRequest.getDescription());
+        product.setPrice(productRequest.getPrice());
+        product.setStockQuantity(productRequest.getStockQuantity() == null
                 ? product.getStockQuantity()
-                : productDto.getStockQuantity());
-        product.setImageUrl(productDto.getImageUrl());
+                : productRequest.getStockQuantity());
+        product.setImageUrl(productRequest.getImageUrl());
         product.setCategory(category);
 
         Product updatedProduct = productRepository.save(product);
@@ -93,5 +100,24 @@ public class ProductService {
             dto.setCategoryName(product.getCategory().getName());
         }
         return dto;
+    }
+
+    private Category findCategory(Long categoryId) {
+        if (categoryId == null) {
+            return null;
+        }
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+    }
+
+    private ProductRequestDTO toRequest(ProductDto productDto) {
+        return ProductRequestDTO.builder()
+                .name(productDto.getName())
+                .description(productDto.getDescription())
+                .price(productDto.getPrice())
+                .stockQuantity(productDto.getStockQuantity())
+                .categoryId(productDto.getCategoryId())
+                .imageUrl(productDto.getImageUrl())
+                .build();
     }
 }

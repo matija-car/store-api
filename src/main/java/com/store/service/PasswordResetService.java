@@ -32,6 +32,7 @@ public class PasswordResetService {
     private final PasswordResetTokenRepository resetTokenRepository;
     private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -56,10 +57,7 @@ public class PasswordResetService {
 
             String resetLink = frontendUrl + "/reset-password?token=" + rawToken;
 
-            // TODO: replace with a real transactional email send (e.g. Spring Mail +
-            // an SMTP provider like SendGrid/Mailgun/Resend) before going live.
-            // Logging it here keeps the flow testable without email infra set up yet.
-            log.info("Password reset requested for {}. Reset link (would be emailed): {}", email, resetLink);
+            emailService.sendPasswordResetEmail(email, resetLink);
         });
     }
 

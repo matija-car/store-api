@@ -25,6 +25,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -103,6 +105,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Should get user by id")
     void testGetUserById() throws Exception {
+        when(userService.getUserByEmail("john@example.com")).thenReturn(johnDto);
         when(userService.getUserById(1L)).thenReturn(johnDto);
 
         mockMvc.perform(get("/users/1")
@@ -168,6 +171,11 @@ class UserControllerTest {
     @Test
     @DisplayName("Should return 404 for non-existent user")
     void testGetUserNotFound() throws Exception {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "admin@example.com",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
         when(userService.getUserById(999L))
                 .thenThrow(new ResourceNotFoundException("User not found with id: 999"));
 

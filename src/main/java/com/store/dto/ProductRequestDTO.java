@@ -3,6 +3,7 @@ package com.store.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -24,6 +25,9 @@ public class ProductRequestDTO {
     private BigDecimal price;
 
     private String imageUrl;
+
+    @Min(value = 0, message = "Količina ne može biti negativna")
+    private Integer stockQuantity;
 
     private Long categoryId;
 }

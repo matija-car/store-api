@@ -7,6 +7,7 @@ import com.store.entity.OrderItem;
 import com.store.entity.Product;
 import com.store.entity.User;
 import com.store.exception.ResourceNotFoundException;
+import com.store.exception.InsufficientStockException;
 import com.store.repository.OrderRepository;
 import com.store.repository.ProductRepository;
 import com.store.repository.UserRepository;
@@ -50,8 +51,14 @@ public class OrderService {
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         for (var itemReq : request.getItems()) {
-            Product product = productRepository.findById(itemReq.getProductId())
+            Product product = productRepository.findByIdForUpdate(itemReq.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Proizvod s ID-em " + itemReq.getProductId() + " nije pronađen"));
+            int availableStock = product.getStockQuantity() == null ? 0 : product.getStockQuantity();
+            if (itemReq.getQuantity() > availableStock) {
+                throw new InsufficientStockException("Nema dovoljno zalihe za proizvod s ID-em "
+                        + itemReq.getProductId() + ". Dostupno: " + availableStock);
+            }
+            product.setStockQuantity(availableStock - itemReq.getQuantity());
 
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
             totalAmount = totalAmount.add(itemTotal);

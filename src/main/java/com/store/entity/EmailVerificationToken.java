@@ -12,6 +12,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Entity
 @Table(name = "email_verification_tokens")
+// TODO: Planned feature; add token issuance and verification services before enabling it.
 public class EmailVerificationToken {
 
     @Id

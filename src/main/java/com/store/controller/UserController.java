@@ -63,6 +63,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User found")
     @ApiResponse(responseCode = "404", description = "User not found")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+        validateOwnership(id);
         UserDto user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
@@ -109,7 +110,14 @@ public class UserController {
     }
 
     private void validateOwnership(Long userId) {
-        String currentEmail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+        if (isAdmin) {
+            return;
+        }
+
+        String currentEmail = (String) authentication.getPrincipal();
         UserDto currentUser = userService.getUserByEmail(currentEmail);
         if (!currentUser.getId().equals(userId)) {
             log.warn("User {} attempted to modify resource belonging to user id {}", currentEmail, userId);
