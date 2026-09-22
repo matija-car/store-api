@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <module name="store" />
+    <module name="store-api" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.store.StoreApplication" />
     <method v="2">
       <option name="Make" enabled="true" />

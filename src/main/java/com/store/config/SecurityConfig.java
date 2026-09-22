@@ -47,19 +47,27 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/", "/message").permitAll()
-                        .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        .requestMatchers(
+                                "/auth/register", "/auth/login", "/auth/refresh", "/auth/logout",
+                                "/auth/forgot-password", "/auth/reset-password"
+                        ).permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/users/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/users/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/users/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/users/**").authenticated()
+                        // Product browsing is public — customers shouldn't need an account
+                        // just to look at what's for sale in the store.
+                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                        // Only admins (i.e. your girlfriend's account) can create/edit/remove products.
+                        .requestMatchers(HttpMethod.POST, "/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/products/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/products/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/products/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/products/**").authenticated()
+                        // Listing/creating users directly is an admin action; individual users
+                        // manage their own account via /auth/register plus the ownership check
+                        // already enforced in UserController for GET/PUT/DELETE /users/{id}.
+                        .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
+                        .requestMatchers("/users/**").authenticated()
 
                         .anyRequest().authenticated()
                 )

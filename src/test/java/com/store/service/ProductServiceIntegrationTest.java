@@ -51,7 +51,6 @@ class ProductServiceIntegrationTest {
         productRepository.deleteAll();
         categoryRepository.deleteAll();
 
-        // Forsiraj slanje pending DELETE SQL-ova na H2, pa ocisti session cache
         entityManager.flush();
         entityManager.clear();
 
