@@ -54,6 +54,12 @@ To stop and wipe the database:
 docker-compose down -v
 ```
 
+### Railway deployment
+
+Set `SPRING_PROFILES_ACTIVE=prod` as an environment variable on Railway. The
+application also rejects the development JWT fallback whenever a non-H2 datasource
+is configured, so this profile is defense in depth.
+
 ## API docs
 
 Once the app is running, Swagger UI is at:
