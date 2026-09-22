@@ -3,98 +3,87 @@ package com.store.service;
 import com.store.dto.ProductDto;
 import com.store.entity.Category;
 import com.store.entity.Product;
-import com.store.exception.ResourceNotFoundException;
 import com.store.mapper.ProductMapper;
 import com.store.repository.CategoryRepository;
 import com.store.repository.ProductRepository;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
-@Slf4j
+@Transactional
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
 
-    @Transactional(readOnly = true)
-    public Page<ProductDto> getAllProducts(Integer categoryId, Pageable pageable) {
-        log.debug("Getting products with categoryId filter: {}, pagination: page={}, size={}",
-                categoryId, pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<Product> products;
-        if (categoryId != null) {
-            products = productRepository.findByCategoryId(categoryId, pageable);
-        } else {
-            products = productRepository.findAll(pageable);
-        }
-
-        return products.map(productMapper::toDto);
+    public ProductService(ProductRepository productRepository,
+                          CategoryRepository categoryRepository,
+                          ProductMapper productMapper) {
+        this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
+        this.productMapper = productMapper;
     }
 
-    @Transactional(readOnly = true)
+    public Page<ProductDto> getAllProducts(Integer categoryId, Pageable pageable) {
+        if (categoryId != null) {
+            return productRepository.findByCategoryId(Long.valueOf(categoryId), pageable)
+                    .map(productMapper::toDto);
+        }
+        return productRepository.findAll(pageable)
+                .map(productMapper::toDto);
+    }
+
     public ProductDto getProductById(Long id) {
-        log.debug("Getting product with id: {}", id);
-
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
         return productMapper.toDto(product);
     }
 
-    @Transactional
     public ProductDto createProduct(ProductDto productDto) {
-        log.info("Creating new product: {}", productDto.getName());
-
-        Category category = categoryRepository.findById(productDto.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Category not found with id: " + productDto.getCategoryId()
-                ));
-
         Product product = productMapper.toEntity(productDto);
-        product.setCategory(category);
+
+        if (productDto.getCategoryId() != null) {
+            // Konverzija Long -> Integer za CategoryRepository
+            Category category = categoryRepository.findById(productDto.getCategoryId().intValue())
+                    .orElseThrow(() -> new RuntimeException("Category not found with id: " + productDto.getCategoryId()));
+            product.setCategory(category);
+        }
 
         Product savedProduct = productRepository.save(product);
-        log.info("Product created successfully with id: {}", savedProduct.getId());
-
         return productMapper.toDto(savedProduct);
     }
 
-    @Transactional
     public ProductDto updateProduct(Long id, ProductDto productDto) {
-        log.info("Updating product with id: {}", id);
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        existingProduct.setName(productDto.getName());
+        existingProduct.setDescription(productDto.getDescription());
+        existingProduct.setPrice(productDto.getPrice());
 
-        Category category = categoryRepository.findById(productDto.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Category not found with id: " + productDto.getCategoryId()
-                ));
+        // Postavljanje količine
+        if (productDto.getStockQuantity() != null) {
+            existingProduct.setStockQuantity(productDto.getStockQuantity());
+        }
 
-        productMapper.update(productDto, product);
-        product.setCategory(category);
+        if (productDto.getCategoryId() != null) {
+            // Konverzija Long -> Integer za CategoryRepository
+            Category category = categoryRepository.findById(productDto.getCategoryId().intValue())
+                    .orElseThrow(() -> new RuntimeException("Category not found with id: " + productDto.getCategoryId()));
+            existingProduct.setCategory(category);
+        }
 
-        Product updatedProduct = productRepository.save(product);
-        log.info("Product updated successfully with id: {}", id);
-
+        Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toDto(updatedProduct);
     }
 
-    @Transactional
     public void deleteProduct(Long id) {
-        log.info("Deleting product with id: {}", id);
-
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-
-        productRepository.delete(product);
-        log.info("Product deleted successfully with id: {}", id);
+        if (!productRepository.existsById(id)) {
+            throw new RuntimeException("Product not found with id: " + id);
+        }
+        productRepository.deleteById(id);
     }
 }

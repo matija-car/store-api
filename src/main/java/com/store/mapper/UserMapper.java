@@ -4,31 +4,25 @@ import com.store.dto.RegisterUserRequest;
 import com.store.dto.UpdateUserRequest;
 import com.store.dto.UserDto;
 import com.store.entity.User;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     UserDto toDto(User user);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "password", ignore = true)
-    @Mapping(target = "addresses", ignore = true)
-    @Mapping(target = "profile", ignore = true)
-    @Mapping(target = "favoriteProducts", ignore = true)
-    // role is deliberately never bound to a request DTO — it always starts as
-    // CUSTOMER (the entity's default) and can only be changed directly in the
-    // database or via a future admin-only endpoint. Letting it come from user
-    // input would let anyone register themselves as an ADMIN.
-    @Mapping(target = "role", ignore = true)
-    User toEntity(RegisterUserRequest request);
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    User toEntity(UserDto userDto);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "password", ignore = true)
-    @Mapping(target = "addresses", ignore = true)
-    @Mapping(target = "profile", ignore = true)
-    @Mapping(target = "favoriteProducts", ignore = true)
-    void update(UpdateUserRequest request, @MappingTarget User user);
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    User toEntity(RegisterUserRequest registerUserRequest);
+
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE,
+            nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void update(UpdateUserRequest dto, @MappingTarget User user);
 }
