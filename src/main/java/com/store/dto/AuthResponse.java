@@ -17,6 +17,8 @@ public class AuthResponse {
     @Schema(description = "JWT token", example = "eyJhbGciOiJIUzUxMiJ9...")
     private String token;
 
+    private String refreshToken;
+
     @Schema(description = "User email", example = "john@example.com")
     private String email;
 

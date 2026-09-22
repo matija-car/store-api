@@ -1,11 +1,17 @@
 package com.store.controller;
 
 import com.store.dto.AuthResponse;
+import com.store.dto.ForgotPasswordRequest;
 import com.store.dto.LoginRequest;
 import com.store.dto.RegisterUserRequest;
+import com.store.dto.RefreshTokenRequest;
+import com.store.dto.ResetPasswordRequest;
 import com.store.dto.UserDto;
 import com.store.entity.Role;
+import com.store.entity.User;
 import com.store.security.JwtTokenProvider;
+import com.store.service.PasswordResetService;
+import com.store.service.RefreshTokenService;
 import com.store.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,6 +33,8 @@ public class AuthController {
 
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
@@ -78,10 +86,15 @@ public class AuthController {
         String token = role == Role.CUSTOMER
                 ? jwtTokenProvider.generateToken(loginRequest.getEmail())
                 : jwtTokenProvider.generateToken(loginRequest.getEmail(), role);
+        User authenticatedUser = userService.getUserEntityByEmail(loginRequest.getEmail());
+        String refreshToken = authenticatedUser == null
+                ? null
+                : refreshTokenService.issueToken(authenticatedUser);
         log.info("User logged in successfully: {}", loginRequest.getEmail());
 
         AuthResponse response = AuthResponse.builder()
                 .token(token)
+                .refreshToken(refreshToken)
                 .email(loginRequest.getEmail())
                 .id(user.getId())
                 .name(user.getName())
@@ -90,5 +103,41 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        User user = refreshTokenService.rotateToken(request.getRefreshToken());
+        Role role = user.getRole() == null ? Role.CUSTOMER : user.getRole();
+        String accessToken = jwtTokenProvider.generateToken(user.getEmail(), role);
+        String replacementRefreshToken = refreshTokenService.issueToken(user);
+
+        return ResponseEntity.ok(AuthResponse.builder()
+                .token(accessToken)
+                .refreshToken(replacementRefreshToken)
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .role(role)
+                .message("Token refreshed")
+                .build());
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        refreshTokenService.revokeToken(request.getRefreshToken());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestReset(request.getEmail());
+        return ResponseEntity.accepted().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.noContent().build();
     }
 }

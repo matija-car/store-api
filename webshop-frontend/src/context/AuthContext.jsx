@@ -25,6 +25,7 @@ export function AuthProvider({ children }) {
         try {
             const response = await API.post('/auth/login', { email, password });
             const authToken = response.data.token || response.data.accessToken;
+            const refreshToken = response.data.refreshToken;
             const userObject = response.data.user || {
                 id: response.data.id,
                 name: response.data.name,
@@ -34,6 +35,9 @@ export function AuthProvider({ children }) {
             setToken(authToken);
             setUser(userObject);
             localStorage.setItem('user', JSON.stringify(userObject));
+            if (refreshToken) {
+                localStorage.setItem('refreshToken', refreshToken);
+            }
             return { success: true };
         } catch (error) {
             return {
@@ -56,9 +60,14 @@ export function AuthProvider({ children }) {
     };
 
     const logout = () => {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+            API.post('/auth/logout', { refreshToken }).catch(() => {});
+        }
         setToken(null);
         setUser(null);
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
     };
 

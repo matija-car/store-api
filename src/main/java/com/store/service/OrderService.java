@@ -5,11 +5,15 @@ import com.store.dto.OrderResponseDTO;
 import com.store.entity.Order;
 import com.store.entity.OrderItem;
 import com.store.entity.Product;
+import com.store.entity.User;
+import com.store.exception.ResourceNotFoundException;
 import com.store.repository.OrderRepository;
 import com.store.repository.ProductRepository;
+import com.store.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -22,10 +26,18 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO request) {
+        String currentEmail = (String) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        User currentUser = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + currentEmail));
+
         Order order = Order.builder()
+                .user(currentUser)
                 .customerName(request.getCustomerName())
                 .customerEmail(request.getCustomerEmail())
                 .shippingAddress(request.getShippingAddress())
@@ -39,7 +51,7 @@ public class OrderService {
 
         for (var itemReq : request.getItems()) {
             Product product = productRepository.findById(itemReq.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Proizvod s ID-em " + itemReq.getProductId() + " nije pronađen"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Proizvod s ID-em " + itemReq.getProductId() + " nije pronađen"));
 
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
             totalAmount = totalAmount.add(itemTotal);
@@ -57,23 +69,26 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
 
-        return mapToResponseDTO(savedOrder);
+        return toResponseDTO(savedOrder);
     }
 
     public List<OrderResponseDTO> getAllOrders() {
         return orderRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
-                .map(this::mapToResponseDTO)
+                .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
     public OrderResponseDTO getOrderById(Long id) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Narudžba nije pronađena"));
-        return mapToResponseDTO(order);
+        return toResponseDTO(findOrderById(id));
     }
 
-    private OrderResponseDTO mapToResponseDTO(Order order) {
+    public Order findOrderById(Long id) {
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Narudžba nije pronađena"));
+    }
+
+    public OrderResponseDTO toResponseDTO(Order order) {
         List<OrderResponseDTO.OrderItemResponseDTO> itemDTOs = order.getItems().stream()
                 .map(item -> OrderResponseDTO.OrderItemResponseDTO.builder()
                         .id(item.getId())

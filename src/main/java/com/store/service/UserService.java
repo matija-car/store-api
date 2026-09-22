@@ -112,6 +112,12 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public User getUserEntityByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+    }
+
+    @Transactional(readOnly = true)
     public boolean verifyCredentials(String email, String password) {
         log.debug("Verifying credentials for user: {}", email);
         try {
