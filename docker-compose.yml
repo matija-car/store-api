@@ -12,7 +12,7 @@ services:
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_FLYWAY_ENABLED: true
-      JWT_SECRET: your-super-secret-key-change-this-in-production
+      JWT_SECRET: ${JWT_SECRET:?Set a random JWT_SECRET of at least 32 characters}
     depends_on:
       db:
         condition: service_healthy

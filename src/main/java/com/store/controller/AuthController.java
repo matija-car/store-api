@@ -154,7 +154,7 @@ public class AuthController {
     }
 
     private void enforceRateLimit(String endpoint, HttpServletRequest request, String email) {
-        if (!authRateLimiter.allow(endpoint, request.getRemoteAddr(), email)) {
+        if (!authRateLimiter.allow(endpoint, request, email)) {
             throw new RateLimitExceededException(
                     "Too many authentication requests. Please try again later.");
         }

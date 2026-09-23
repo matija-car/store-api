@@ -27,14 +27,17 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final Environment environment;
     private final String allowedOrigins;
+    private final String datasourceUrl;
 
     public SecurityConfig(
             JwtTokenProvider jwtTokenProvider,
             Environment environment,
-            @Value("${app.cors.allowed-origins:}") String allowedOrigins) {
+            @Value("${app.cors.allowed-origins:}") String allowedOrigins,
+            @Value("${spring.datasource.url}") String datasourceUrl) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.environment = environment;
         this.allowedOrigins = allowedOrigins;
+        this.datasourceUrl = datasourceUrl;
     }
 
     @Bean
@@ -43,6 +46,10 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(headers -> headers
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000)))
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers(HttpMethod.GET, "/products/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
@@ -54,7 +61,9 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
                             .requestMatchers("/auth/**").permitAll();
-                    if (Arrays.asList(environment.getActiveProfiles()).contains("dev")) {
+                    auth.requestMatchers("/h2-console/**").denyAll();
+                    if (Arrays.asList(environment.getActiveProfiles()).contains("dev")
+                            && isH2Datasource()) {
                         auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll();
                     }
                     auth.anyRequest().authenticated();
@@ -67,6 +76,11 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwtTokenProvider);
+    }
+
+    private boolean isH2Datasource() {
+        return datasourceUrl != null
+                && datasourceUrl.trim().toLowerCase().startsWith("jdbc:h2:");
     }
 
     @Bean
