@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { StoreModeProvider } from './context/StoreModeContext';
 import './index.css';
 
 class AppErrorBoundary extends React.Component {
@@ -30,8 +31,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <AppErrorBoundary>
             <AuthProvider>
                 <CartProvider>
-                    <App />
-                </CartProvider>
+            <StoreModeProvider>
+                <App />
+            </StoreModeProvider>
+        </CartProvider>
             </AuthProvider>
         </AppErrorBoundary>
     </React.StrictMode>

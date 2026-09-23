@@ -115,6 +115,35 @@ export default function AdminProducts() {
         }
     };
 
+    const updateStock = async (product) => {
+        const value = window.prompt(`Nova zaliha za "${product.name}":`, String(product.stockQuantity ?? 0));
+        if (value === null) return;
+        const stockQuantity = Number(value);
+        if (!Number.isInteger(stockQuantity) || stockQuantity < 0) {
+            setError('Zaliha mora biti cijeli broj 0 ili veći.');
+            return;
+        }
+        try {
+            await API.patch(`/products/${product.id}/stock`, { stockQuantity });
+            setMessage('Zaliha je ažurirana.');
+            await loadProducts();
+        } catch (requestError) {
+            setError(requestError.response?.data?.message || 'Zaliha nije moguće ažurirati.');
+        }
+    };
+
+    const permanentlyDeleteProduct = async (product) => {
+        if (!window.confirm(`Trajno obrisati "${product.name}"? Ova radnja se ne može poništiti.`)) return;
+        setError('');
+        try {
+            await API.delete(`/products/${product.id}/permanent`);
+            setProducts((current) => current.filter((item) => item.id !== product.id));
+            setMessage('Proizvod je trajno obrisan.');
+        } catch (requestError) {
+            setError(requestError.response?.data?.message || 'Proizvod nije moguće trajno obrisati.');
+        }
+    };
+
     if (user?.role !== 'ADMIN') return <Navigate to="/" replace />;
 
     return (
@@ -171,8 +200,12 @@ export default function AdminProducts() {
                             </div>
                             <div className="flex gap-2">
                                 <button className="rounded-lg border border-burgundy/30 px-3 py-2 text-sm font-semibold text-burgundy" onClick={() => editProduct(product)}>Uredi</button>
+                                <button className="rounded-lg border border-amber-200 px-3 py-2 text-sm font-semibold text-amber-800" onClick={() => updateStock(product)}>Promijeni zalihu</button>
                                 {product.active === false ? (
-                                    <button className="rounded-lg border border-green-200 px-3 py-2 text-sm font-semibold text-green-700" onClick={() => restoreProduct(product.id)}>Vrati u ponudu</button>
+                                    <>
+                                        <button className="rounded-lg border border-green-200 px-3 py-2 text-sm font-semibold text-green-700" onClick={() => restoreProduct(product.id)}>Vrati u ponudu</button>
+                                        <button className="rounded-lg border border-red-300 px-3 py-2 text-sm font-semibold text-red-800" onClick={() => permanentlyDeleteProduct(product)}>Trajno obriši</button>
+                                    </>
                                 ) : (
                                     <button className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700" onClick={() => deleteProduct(product.id)}>Makni iz ponude</button>
                                 )}

@@ -16,6 +16,7 @@ import AdminCommissions from './pages/AdminCommissions';
 import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
 import StoreInfo from './pages/StoreInfo';
+import LegalInfo from './pages/LegalInfo';
 
 export default function App() {
     return (
@@ -36,6 +37,9 @@ export default function App() {
                         <Route path="/about" element={<About />} />
                         <Route path="/sigurna-kupnja" element={<StoreInfo path="/sigurna-kupnja" />} />
                         <Route path="/dostava-i-preuzimanje" element={<StoreInfo path="/dostava-i-preuzimanje" />} />
+                        <Route path="/uvjeti-poslovanja" element={<LegalInfo path="/uvjeti-poslovanja" />} />
+                        <Route path="/privatnost" element={<LegalInfo path="/privatnost" />} />
+                        <Route path="/autorsko-djelo" element={<LegalInfo path="/autorsko-djelo" />} />
                         <Route path="/commission-request" element={<CommissionRequest />} />
                         <Route path="/admin/products" element={<AdminProducts />} />
                         <Route path="/admin/orders" element={<AdminOrders />} />

@@ -187,6 +187,16 @@ class ProductServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("Should permanently delete an unreferenced product")
+    void testPermanentlyDeleteProduct() {
+        ProductDto createdProduct = productService.createProduct(productDto);
+
+        productService.permanentlyDeleteProduct(createdProduct.getId());
+
+        assertFalse(productRepository.existsById(createdProduct.getId()));
+    }
+
+    @Test
     @DisplayName("Should throw exception when deleting non-existent product")
     void testDeleteProductNotFound() {
         assertThrows(ResourceNotFoundException.class, () -> productService.deleteProduct(999L));

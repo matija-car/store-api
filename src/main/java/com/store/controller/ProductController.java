@@ -2,6 +2,7 @@ package com.store.controller;
 
 import com.store.dto.ProductDto;
 import com.store.dto.ProductRequestDTO;
+import com.store.dto.ProductStockUpdateRequest;
 import com.store.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -55,6 +56,13 @@ public class ProductController {
         return ResponseEntity.ok(updated);
     }
 
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<ProductDto> updateStock(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductStockUpdateRequest request) {
+        return ResponseEntity.ok(productService.updateStock(id, request.getStockQuantity()));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
@@ -64,6 +72,12 @@ public class ProductController {
     @PostMapping("/{id}/restore")
     public ResponseEntity<Void> restoreProduct(@PathVariable Long id) {
         productService.restoreProduct(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/permanent")
+    public ResponseEntity<Void> permanentlyDeleteProduct(@PathVariable Long id) {
+        productService.permanentlyDeleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -7,6 +7,7 @@ import com.store.entity.Product;
 import com.store.exception.ResourceNotFoundException;
 import com.store.repository.CategoryRepository;
 import com.store.repository.ProductRepository;
+import com.store.repository.OrderItemRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,13 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final OrderItemRepository orderItemRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository,
+                          OrderItemRepository orderItemRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     @Transactional(readOnly = true)
@@ -123,6 +127,23 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         product.setActive(true);
         productRepository.save(product);
+    }
+
+    public void permanentlyDeleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        if (orderItemRepository.existsByProductId(id)) {
+            throw new IllegalArgumentException(
+                    "Proizvod se ne može trajno obrisati jer postoji u povijesti narudžbi. Maknite ga iz ponude.");
+        }
+        productRepository.delete(product);
+    }
+
+    public ProductDto updateStock(Long id, Integer stockQuantity) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        product.setStockQuantity(stockQuantity);
+        return mapToDto(productRepository.save(product));
     }
 
     private ProductDto mapToDto(Product product) {

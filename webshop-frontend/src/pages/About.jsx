@@ -1,3 +1,18 @@
+const studioImages = [
+    {
+        src: 'https://res.cloudinary.com/l3qezpat/image/upload/f_auto/q_auto/WhatsApp_Image_2026-09-23_at_06.46.41.jpg',
+        alt: 'Studio fotografija 1',
+    },
+    {
+        src: 'https://res.cloudinary.com/l3qezpat/image/upload/f_auto/q_auto/lanica12.jpg',
+        alt: 'Studio fotografija 2',
+    },
+    {
+        src: 'https://res.cloudinary.com/l3qezpat/image/upload/f_auto/q_auto/lanica13.jpg',
+        alt: 'Studio fotografija 3',
+    },
+];
+
 export default function About() {
     return (
         <main className="mx-auto max-w-5xl px-5 py-10 sm:px-8 lg:py-16">
@@ -33,12 +48,22 @@ export default function About() {
                 </div>
 
                 <div className="rounded-2xl border border-amber-900/10 bg-cream p-6 shadow-sm">
-                    <img
-                        src="/images/about-us.jpg"
-                        alt="The couple behind the studio"
-                        className="mb-4 h-72 w-full rounded-xl object-cover"
-                    />
-                    <p className="eyebrow mb-2">Studio</p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <img
+                            src={studioImages[0].src}
+                            alt={studioImages[0].alt}
+                            className="h-64 w-full rounded-xl bg-white object-cover shadow-sm sm:col-span-2"
+                        />
+                        {studioImages.slice(1).map((image) => (
+                            <img
+                                key={image.src}
+                                src={image.src}
+                                alt={image.alt}
+                                className="h-48 w-full rounded-xl bg-white object-cover shadow-sm"
+                            />
+                        ))}
+                    </div>
+                    <p className="eyebrow mb-2 mt-6">Studio</p>
                     <p className="leading-7 text-stone-600">
                         {/* TODO: couple intro/photo caption */}
                         Kreativni studio supružnika utemeljen na vjeri, obitelji i ljubavi prema pažljivo izrađenim rukotvorinama.

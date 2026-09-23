@@ -3,16 +3,20 @@ import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useStoreMode } from '../context/StoreModeContext';
 
 export default function Cart() {
     const { cart, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
     const { token } = useAuth();
+    const { mode } = useStoreMode();
+    const isCatalog = mode === 'CATALOG';
 
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [guestOrderEmail, setGuestOrderEmail] = useState('');
     const [customer, setCustomer] = useState({ customerName: '', customerEmail: '', shippingAddress: '', city: '', postalCode: '', prayerRequest: '' });
+    const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
     const handleCheckout = async () => {
         const trimmedCustomer = Object.fromEntries(
@@ -22,6 +26,10 @@ export default function Cart() {
         const namePattern = /^[\p{L}][\p{L} .'-]*$/u;
         const postalPattern = /^[0-9]{4,10}$/;
 
+        if (!privacyAccepted) {
+            setErrorMessage('Morate prihvatiti Politiku privatnosti.');
+            return;
+        }
         if (!namePattern.test(trimmedCustomer.customerName) || trimmedCustomer.customerName.length > 100) {
             setErrorMessage('Unesite ispravno ime i prezime.');
             return;
@@ -58,7 +66,9 @@ export default function Cart() {
             };
 
             await API.post('/orders', orderPayload);
-            setSuccessMessage('Narudžba je uspješno zaprimljena!');
+            setSuccessMessage(isCatalog
+                ? 'Vaš upit je poslan, javit ćemo vam se e-mailom.'
+                : 'Narudžba je uspješno zaprimljena!');
             if (!token) setGuestOrderEmail(trimmedCustomer.customerEmail);
             clearCart();
         } catch (err) {
@@ -162,7 +172,7 @@ export default function Cart() {
                     </div>
 
                     <div className="rounded-2xl border border-amber-900/10 bg-cream p-6">
-                        <p className="eyebrow mb-2">Podaci za dostavu</p>
+                        <p className="eyebrow mb-2">{isCatalog ? 'Pošaljite upit za odabrane radove' : 'Podaci za dostavu'}</p>
                         <div className="grid gap-3">
                             {[
                                 ['customerName', 'Ime i prezime', 'text'],
@@ -173,15 +183,19 @@ export default function Cart() {
                             ].map(([name, label, type]) => <input key={name} required type={type} minLength={name === 'postalCode' ? 4 : undefined} maxLength={name === 'postalCode' ? 10 : name === 'customerEmail' ? 254 : name === 'shippingAddress' ? 255 : 100} pattern={name === 'customerEmail' ? '[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}' : name === 'postalCode' ? '[0-9]{4,10}' : undefined} inputMode={name === 'postalCode' ? 'numeric' : undefined} placeholder={label} value={customer[name]} onChange={(e) => setCustomer({ ...customer, [name]: e.target.value })} className="input-field" />)}
                         </div>
                         <div className="mt-6">
-                            <label className="mb-2 block text-sm font-semibold text-stone-700">Postoji li posebna molitvena nakana ili životno razdoblje za koje možemo moliti dok pakiramo vašu narudžbu?</label>
+                            <label className="mb-2 block text-sm font-semibold text-stone-700">{isCatalog ? 'Vaša poruka (opcionalno)' : 'Postoji li posebna molitvena nakana ili životno razdoblje za koje možemo moliti dok pakiramo vašu narudžbu?'}</label>
                             <textarea
                                 value={customer.prayerRequest}
                                 maxLength={1000}
                                 onChange={(e) => setCustomer({ ...customer, prayerRequest: e.target.value })}
-                                placeholder="Neobavezno — kratka molitvena poruka za naš tim"
+                                placeholder={isCatalog ? 'Neobavezna poruka za naš tim' : 'Neobavezno — kratka molitvena poruka za naš tim'}
                                 className="input-field min-h-24"
                             />
                         </div>
+                        <label className="mt-5 flex items-start gap-3 text-sm text-stone-600">
+                            <input type="checkbox" checked={privacyAccepted} onChange={(event) => setPrivacyAccepted(event.target.checked)} className="mt-1" />
+                            <span>Slažem se s <Link to="/privatnost" className="font-semibold text-burgundy underline">Politikom privatnosti</Link>.</span>
+                        </label>
                         <div className="mt-6 flex items-center justify-between gap-4 border-t border-stone-300/70 pt-5">
                         <div>
                             <span className="text-stone-600">Ukupno: </span>
@@ -190,10 +204,10 @@ export default function Cart() {
 
                         <button
                             onClick={handleCheckout}
-                            disabled={loading}
+                            disabled={loading || !privacyAccepted}
                             className="w-full rounded-lg bg-burgundy px-8 py-3 text-white transition hover:bg-burgundy-dark disabled:opacity-50 sm:w-auto"
                         >
-                            {loading ? 'Slanje...' : 'Završi narudžbu'}
+                            {loading ? 'Slanje...' : isCatalog ? 'Pošalji upit' : 'Naruči i plati'}
                         </button>
                         </div>
                     </div>

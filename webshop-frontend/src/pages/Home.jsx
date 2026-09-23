@@ -44,13 +44,13 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (searchInput !== search) {
-                updateParams({ search: searchInput || null, page: 0 });
-            }
-        }, 300);
-        return () => clearTimeout(timeout);
-    }, [searchInput, search, updateParams]);
+        setSearchInput(search);
+    }, [search]);
+
+    const submitSearch = (event) => {
+        event.preventDefault();
+        updateParams({ search: searchInput.trim() || null, page: 0 });
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -83,7 +83,10 @@ export default function Home() {
             </section>
             <section id="collection" className="mx-auto max-w-7xl px-4 py-8 sm:px-8 lg:py-12">
                 <div className="mb-8 grid gap-3 border-b border-stone-200 pb-6 md:grid-cols-5">
-                    <label className="md:col-span-2"><span className="sr-only">Pretraži proizvode</span><input value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder="Pretraži proizvode..." className="input-field" /></label>
+                    <form onSubmit={submitSearch} className="flex gap-2 md:col-span-2">
+                        <label className="flex-1"><span className="sr-only">Pretraži proizvode</span><input value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder="Pretraži proizvode..." className="input-field" /></label>
+                        <button type="submit" className="rounded-lg bg-burgundy px-4 py-2 font-semibold text-white hover:bg-burgundy-dark">Traži</button>
+                    </form>
                     <select value={categoryId} onChange={(event) => updateParams({ categoryId: event.target.value, page: 0 })} className="input-field"><option value="">Sve kategorije</option>{categories.map((category) => <option key={category.id} value={category.id}>{categoryNames[category.name] || category.name}</option>)}</select>
                     <input value={minPrice} onChange={(event) => updateParams({ minPrice: event.target.value, page: 0 })} type="number" min="0" step="0.01" placeholder="Min. cijena" className="input-field" />
                     <input value={maxPrice} onChange={(event) => updateParams({ maxPrice: event.target.value, page: 0 })} type="number" min="0" step="0.01" placeholder="Max. cijena" className="input-field" />
