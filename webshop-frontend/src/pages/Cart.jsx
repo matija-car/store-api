@@ -3,13 +3,10 @@ import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { useStoreMode } from '../context/StoreModeContext';
 
 export default function Cart() {
     const { cart, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
     const { token } = useAuth();
-    const { mode } = useStoreMode();
-    const isCatalog = mode === 'CATALOG';
 
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -66,9 +63,7 @@ export default function Cart() {
             };
 
             await API.post('/orders', orderPayload);
-            setSuccessMessage(isCatalog
-                ? 'Vaš upit je poslan, javit ćemo vam se e-mailom.'
-                : 'Narudžba je uspješno zaprimljena!');
+            setSuccessMessage('Vaš upit je poslan, javit ćemo vam se e-mailom.');
             if (!token) setGuestOrderEmail(trimmedCustomer.customerEmail);
             clearCart();
         } catch (err) {
@@ -87,7 +82,7 @@ export default function Cart() {
     if (cart.length === 0 && !successMessage) {
         return (
             <div className="container mx-auto px-4 py-16 text-center">
-                <h2 className="display-font mb-4 text-2xl text-stone-800">Vaša košarica je prazna</h2>
+                <h2 className="display-font mb-4 text-2xl text-stone-800">Niste još odabrali nijedno djelo</h2>
                 <Link to="/" className="inline-block rounded-lg bg-burgundy px-6 py-2 text-white hover:bg-burgundy-dark">
                     Pregledaj ponudu
                 </Link>
@@ -98,7 +93,7 @@ export default function Cart() {
     return (
         <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8 lg:py-16">
             <p className="eyebrow mb-3">Vaš odabir</p>
-            <h1 className="display-font mb-8 text-4xl font-bold text-ink">Košarica</h1>
+            <h1 className="display-font mb-8 text-4xl font-bold text-ink">Odabrana djela</h1>
 
             {successMessage && (
                 <div className="mb-6 p-4 bg-green-50 text-green-700 rounded border border-green-200 text-center">
@@ -106,7 +101,7 @@ export default function Cart() {
                     {guestOrderEmail && (
                         <p className="mt-2 text-sm">
                             Ako se registrirate ili prijavite s adresom <strong>{guestOrderEmail}</strong>,
-                            ova će se narudžba povezati s vašim računom i moći ćete je pratiti u{' '}
+                            ovaj će se upit povezati s vašim računom i moći ćete ga pratiti u{' '}
                             <Link
                                 to={`/login?email=${encodeURIComponent(guestOrderEmail)}`}
                                 className="font-semibold underline"
@@ -172,7 +167,7 @@ export default function Cart() {
                     </div>
 
                     <div className="rounded-2xl border border-amber-900/10 bg-cream p-6">
-                        <p className="eyebrow mb-2">{isCatalog ? 'Pošaljite upit za odabrane radove' : 'Podaci za dostavu'}</p>
+                        <p className="eyebrow mb-2">Pošaljite upit za odabrane radove</p>
                         <div className="grid gap-3">
                             {[
                                 ['customerName', 'Ime i prezime', 'text'],
@@ -183,22 +178,27 @@ export default function Cart() {
                             ].map(([name, label, type]) => <input key={name} required type={type} minLength={name === 'postalCode' ? 4 : undefined} maxLength={name === 'postalCode' ? 10 : name === 'customerEmail' ? 254 : name === 'shippingAddress' ? 255 : 100} pattern={name === 'customerEmail' ? '[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}' : name === 'postalCode' ? '[0-9]{4,10}' : undefined} inputMode={name === 'postalCode' ? 'numeric' : undefined} placeholder={label} value={customer[name]} onChange={(e) => setCustomer({ ...customer, [name]: e.target.value })} className="input-field" />)}
                         </div>
                         <div className="mt-6">
-                            <label className="mb-2 block text-sm font-semibold text-stone-700">{isCatalog ? 'Vaša poruka (opcionalno)' : 'Postoji li posebna molitvena nakana ili životno razdoblje za koje možemo moliti dok pakiramo vašu narudžbu?'}</label>
+                            <label className="mb-2 block text-sm font-semibold text-stone-700">Postoji li nešto za što želite da molimo? (opcionalno)</label>
                             <textarea
                                 value={customer.prayerRequest}
                                 maxLength={1000}
                                 onChange={(e) => setCustomer({ ...customer, prayerRequest: e.target.value })}
-                                placeholder={isCatalog ? 'Neobavezna poruka za naš tim' : 'Neobavezno — kratka molitvena poruka za naš tim'}
+                                placeholder="Ostavite nakanu ili poruku za koju možemo moliti"
                                 className="input-field min-h-24"
                             />
                         </div>
                         <label className="mt-5 flex items-start gap-3 text-sm text-stone-600">
                             <input type="checkbox" checked={privacyAccepted} onChange={(event) => setPrivacyAccepted(event.target.checked)} className="mt-1" />
-                            <span>Slažem se s <Link to="/privatnost" className="font-semibold text-burgundy underline">Politikom privatnosti</Link>.</span>
+                            <span>Suglasan/a sam da se moji podaci (ime, e-mail) pohrane u svrhu obrade ovog upita i daljnje komunikacije putem e-pošte. (Obvezno) Pročitajte našu <Link to="/privatnost" className="font-semibold text-burgundy underline">Izjavu o privatnosti</Link>.</span>
                         </label>
+                        <label className="mt-3 flex items-start gap-3 text-sm text-stone-600">
+                            <input type="checkbox" className="mt-1" />
+                            <span>Želim primati obavijesti o novim djelima i izložbama.</span>
+                        </label>
+                        <p className="mt-3 text-xs leading-5 text-stone-500">Vaši su podaci sigurni. Pročitajte našu <Link to="/privatnost" className="underline">Izjavu o privatnosti</Link>.</p>
                         <div className="mt-6 flex items-center justify-between gap-4 border-t border-stone-300/70 pt-5">
                         <div>
-                            <span className="text-stone-600">Ukupno: </span>
+                            <span className="text-stone-600">Informativna vrijednost: </span>
                             <span className="text-2xl font-bold text-ink">{totalPrice.toFixed(2)} €</span>
                         </div>
 
@@ -207,7 +207,7 @@ export default function Cart() {
                             disabled={loading || !privacyAccepted}
                             className="w-full rounded-lg bg-burgundy px-8 py-3 text-white transition hover:bg-burgundy-dark disabled:opacity-50 sm:w-auto"
                         >
-                            {loading ? 'Slanje...' : isCatalog ? 'Pošalji upit' : 'Naruči i plati'}
+                            {loading ? 'Slanje...' : 'Pošalji upit'}
                         </button>
                         </div>
                     </div>

@@ -4,7 +4,7 @@ const pages = {
         title: 'Uvjeti poslovanja',
         paragraphs: [
             'Ova stranica sadrži osnovne informacije o načinu slanja upita, komunikaciji s kupcem i dogovoru o eventualnoj kupnji.',
-            'U katalog načinu rada slanje obrasca predstavlja upit, a ne automatski sklopljen ugovor niti automatsku naplatu. Nakon primitka upita javit ćemo vam se e-mailom.',
+            'Slanje obrasca predstavlja upit, a ne automatski sklopljen ugovor niti automatsku naplatu. Nakon primitka upita javit ćemo vam se e-mailom.',
             'TODO — konačni tekst uvjeta poslovanja, podaci o OIB-u, adresi, isporuci i drugim pravnim formulacijama moraju biti potvrđeni s knjigovođom ili pravnikom prije objave.',
         ],
     },
@@ -12,9 +12,27 @@ const pages = {
         eyebrow: 'Pravne informacije',
         title: 'Politika privatnosti',
         paragraphs: [
-            'Podatke koje unesete u obrazac koristimo za odgovor na vaš upit, komunikaciju o odabranim proizvodima i obradu eventualnog dogovora.',
+            'Podatke koje unesete u obrazac koristimo za odgovor na vaš upit, komunikaciju o odabranim umjetničkim djelima i obradu eventualnog dogovora.',
             'Podaci se ne koriste za automatsku naplatu bez vašeg dodatnog dogovora.',
             'TODO — tekst o voditelju obrade, pravnoj osnovi, rokovima čuvanja, pravima ispitanika, OIB-u i adresi mora odobriti pravnik prije objave.',
+        ],
+    },
+    '/impresum': {
+        eyebrow: 'Pravne informacije',
+        title: 'Impresum / O nama',
+        paragraphs: [
+            'Dom Svjetla je umjetnički studio i online galerija duhovnih i autorskih djela. Ova stranica služi za predstavljanje radova i slanje upita.',
+            'Naziv vlasnika ili obrta: TODO — upisati službeni naziv. OIB: TODO — upisati OIB. Sjedište i adresa: TODO — upisati službene podatke.',
+            'Kontakt: hello@domsvjetla.com. Za konačne podatke o poslovnom subjektu, odgovornoj osobi i nadležnom tijelu potrebno je savjetovanje s knjigovođom ili pravnikom prije objave.',
+        ],
+    },
+    '/kolacici': {
+        eyebrow: 'Pravne informacije',
+        title: 'Politika kolačića',
+        paragraphs: [
+            'Web stranica može koristiti tehnički nužne kolačiće za osnovan rad aplikacije, primjerice za održavanje sesije i korisničkih postavki.',
+            'Ako se uvedu analitički ili marketinški kolačići, oni se ne smiju aktivirati prije odgovarajuće privole korisnika. Korisnik mora moći naknadno promijeniti ili povući privolu.',
+            'TODO — stvarni popis kolačića, trajanje, pružatelji i način upravljanja privolama moraju biti potvrđeni prije objave.',
         ],
     },
     '/autorsko-djelo': {

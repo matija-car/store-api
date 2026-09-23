@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 const statusLabels = {
     PENDING: 'Na čekanju',
+    INQUIRY: 'Upit zaprimljen',
     PAID: 'Plaćeno',
     SHIPPED: 'Poslano',
     DELIVERED: 'Dostavljeno',
@@ -21,20 +22,20 @@ export default function OrderDetails() {
         if (!user) return;
         API.get(`/orders/${id}`)
             .then((response) => setOrder(response.data))
-            .catch((requestError) => setError(requestError.response?.data?.message || 'Narudžbu nije moguće učitati.'));
+            .catch((requestError) => setError(requestError.response?.data?.message || 'Upit nije moguće učitati.'));
     }, [id, user]);
 
     if (!user) return <Navigate to="/login" replace />;
     if (error) return <main className="mx-auto max-w-4xl px-5 py-16"><p className="rounded-lg bg-red-50 p-4 text-red-700">{error}</p></main>;
-    if (!order) return <main className="py-16 text-center text-stone-500">Učitavanje narudžbe...</main>;
+    if (!order) return <main className="py-16 text-center text-stone-500">Učitavanje upita...</main>;
 
     return (
         <main className="mx-auto max-w-5xl px-5 py-10 sm:px-8">
             <Link to="/orders" className="text-sm font-semibold text-burgundy">← Moje narudžbe</Link>
             <div className="mt-5 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <p className="eyebrow mb-2">Detalji narudžbe</p>
-                    <h1 className="display-font text-4xl font-bold text-ink">Narudžba #{order.id}</h1>
+                    <p className="eyebrow mb-2">Detalji upita</p>
+                    <h1 className="display-font text-4xl font-bold text-ink">Upit #{order.id}</h1>
                     <p className="mt-2 text-sm text-stone-500">{order.createdAt ? new Date(order.createdAt).toLocaleString() : ''}</p>
                 </div>
                 <span className="rounded-full bg-cream px-4 py-2 font-semibold text-burgundy">{statusLabels[order.status] || order.status}</span>
@@ -58,7 +59,7 @@ export default function OrderDetails() {
                             <p>{order.prayerRequest}</p>
                         </div>
                     )}
-                    <p className="mt-4 border-t border-stone-300/70 pt-4 text-xl font-bold">{Number(order.totalAmount).toFixed(2)} €</p>
+                    <p className="mt-4 border-t border-stone-300/70 pt-4 text-xl font-bold">Informativna vrijednost: {Number(order.totalAmount).toFixed(2)} €</p>
                 </aside>
             </div>
         </main>

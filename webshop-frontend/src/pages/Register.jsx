@@ -11,6 +11,7 @@ export default function Register() {
     });
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
+    const [privacyAccepted, setPrivacyAccepted] = useState(false);
     const { register } = useAuth();
     const navigate = useNavigate();
 
@@ -22,6 +23,10 @@ export default function Register() {
         e.preventDefault();
         setError('');
         setMessage('');
+        if (!privacyAccepted) {
+            setError('Morate prihvatiti Izjavu o privatnosti.');
+            return;
+        }
 
         const name = `${formData.firstName} ${formData.lastName}`.trim();
         if (!/^[\p{L}][\p{L} .'-]*$/u.test(name) || name.length < 2 || name.length > 100) {
@@ -124,8 +129,19 @@ export default function Register() {
                     />
                 </div>
 
+                <label className="flex items-start gap-3 text-sm text-stone-600">
+                    <input type="checkbox" checked={privacyAccepted} onChange={(event) => setPrivacyAccepted(event.target.checked)} className="mt-1" />
+                    <span>Suglasan/a sam s obradom svojih podataka za izradu korisničkog računa. Pročitajte našu <Link to="/privatnost" className="font-semibold text-burgundy underline">Izjavu o privatnosti</Link>. (Obvezno)</span>
+                </label>
+                <label className="flex items-start gap-3 text-sm text-stone-600">
+                    <input type="checkbox" className="mt-1" />
+                    <span>Želim primati obavijesti o novim djelima i izložbama.</span>
+                </label>
+                <p className="text-xs leading-5 text-stone-500">Vaši su podaci sigurni. Privola za marketinške obavijesti nije uvjet za registraciju.</p>
+
                 <button
                     type="submit"
+                    disabled={!privacyAccepted}
                     className="w-full rounded-lg bg-burgundy py-3.5 font-semibold text-white transition hover:bg-burgundy-dark"
                 >
                     Registriraj se

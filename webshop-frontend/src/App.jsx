@@ -26,8 +26,12 @@ export default function App() {
                     <Navbar />
                     <Routes>
                         <Route path="/" element={<Home />} />
+                        <Route path="/galerija" element={<Home />} />
+                        <Route path="/djela" element={<Home />} />
                         <Route path="/products/:id" element={<ProductDetails />} />
+                        <Route path="/djela/:id" element={<ProductDetails />} />
                         <Route path="/cart" element={<Cart />} />
+                        <Route path="/odabrano" element={<Cart />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/verify-email" element={<VerifyEmail />} />
@@ -40,6 +44,8 @@ export default function App() {
                         <Route path="/uvjeti-poslovanja" element={<LegalInfo path="/uvjeti-poslovanja" />} />
                         <Route path="/privatnost" element={<LegalInfo path="/privatnost" />} />
                         <Route path="/autorsko-djelo" element={<LegalInfo path="/autorsko-djelo" />} />
+                        <Route path="/impresum" element={<LegalInfo path="/impresum" />} />
+                        <Route path="/kolacici" element={<LegalInfo path="/kolacici" />} />
                         <Route path="/commission-request" element={<CommissionRequest />} />
                         <Route path="/admin/products" element={<AdminProducts />} />
                         <Route path="/admin/orders" element={<AdminOrders />} />

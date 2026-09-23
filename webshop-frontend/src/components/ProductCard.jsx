@@ -41,7 +41,7 @@ export default function ProductCard({ product }) {
 
                 {/* Informacije o proizvodu */}
                 <div className="p-5">
-                    <p className="eyebrow mb-2">Duhovni dar</p>
+                    <p className="eyebrow mb-2">Umjetničko djelo</p>
                     <h3 className="display-font mb-1 truncate text-lg font-bold text-ink">
                         {product.name}
                     </h3>
@@ -65,21 +65,21 @@ export default function ProductCard({ product }) {
 
                 <div className="flex gap-2">
                     <Link
-                        to={`/products/${product.id}`}
+                        to={`/djela/${product.id}`}
                         className="rounded-lg border border-amber-900/15 px-3 py-2 text-xs font-semibold text-stone-700 transition hover:border-burgundy"
                     >
-                        Pogledaj
+                        Pogledaj djelo
                     </Link>
                     <button
                         onClick={handleAddToCart}
                         disabled={outOfStock}
                         className={`rounded-lg px-3 py-2 text-xs font-semibold text-white transition ${outOfStock ? 'cursor-not-allowed bg-stone-400' : 'bg-burgundy hover:bg-burgundy-dark'} ${added ? 'scale-95 animate-pulse' : ''}`}
                     >
-                        {outOfStock ? 'Rasprodano' : added ? 'Dodano' : 'Dodaj'}
+                        {outOfStock ? 'Nedostupno' : added ? 'Odabrano' : 'Zatraži ponudu'}
                     </button>
                 </div>
             </div>
-            {added && <div className="absolute bottom-3 left-3 rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white shadow-lg">Dodano u košaricu</div>}
+            {added && <div className="absolute bottom-3 left-3 rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white shadow-lg">Dodano u odabrana djela</div>}
         </article>
     );
 }

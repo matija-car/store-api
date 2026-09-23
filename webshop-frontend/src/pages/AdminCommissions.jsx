@@ -45,7 +45,7 @@ export default function AdminCommissions() {
 
     return (
         <main className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
-            <p className="eyebrow mb-2">Administration</p>
+            <p className="eyebrow mb-2">Administracija</p>
             <h1 className="display-font mb-8 text-4xl font-bold text-ink">Zahtjevi za izradu slika</h1>
             {error && <p className="mb-5 rounded-lg bg-red-50 p-4 text-red-700">{error}</p>}
             <div className="overflow-x-auto rounded-2xl border border-amber-900/10 bg-white">

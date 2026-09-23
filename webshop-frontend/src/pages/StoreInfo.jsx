@@ -5,7 +5,7 @@ const infoPages = {
         intro: 'Vaša sigurnost i povjerenje važni su nam u svakom koraku kupnje.',
         sections: [
             ['Zaštićeni podaci', 'Podatke koje unesete koristimo samo za obradu narudžbe i komunikaciju vezanu uz kupnju. Ne prodajemo ih niti dijelimo u marketinške svrhe.'],
-            ['Pouzdana narudžba', 'Nakon slanja narudžbe prikazujemo potvrdu, a podatke o dostavi pažljivo provjeravamo prije slanja. Za svako pitanje možete nam se javiti na hello@domsvjetla.com.'],
+            ['Siguran upit', 'Nakon slanja upita prikazujemo potvrdu, a o konačnoj cijeni, preuzimanju i isporuci dogovaramo se putem e-pošte. Za svako pitanje možete nam se javiti na hello@domsvjetla.com.'],
             ['Plaćanje', 'Način plaćanja i sve eventualne troškove prikazujemo jasno prije završetka narudžbe. Nikada ne tražimo lozinku ili osjetljive podatke putem e-maila.'],
         ],
     },
@@ -15,7 +15,7 @@ const infoPages = {
         intro: 'Narudžbe pakiramo pažljivo kako bi sigurno stigle na vašu adresu.',
         sections: [
             ['Dostava', 'Narudžbe šaljemo na adresu koju navedete u obrascu za kupnju. Točan rok i eventualni trošak dostave ovise o odabranoj opciji i prikazuju se prije potvrde narudžbe.'],
-            ['Besplatna dostava', 'Za narudžbe iznad 100 € vrijedi besplatna dostava, osim ako je za određeni proizvod navedeno drugačije.'],
+            ['Preuzimanje i isporuka', 'Uvjeti preuzimanja i isporuke dogovaraju se osobno putem e-pošte za svako umjetničko djelo.'],
             ['Osobno preuzimanje', 'Ako je osobno preuzimanje dostupno za vašu narudžbu, dogovorit ćemo termin i lokaciju putem e-maila nakon potvrde narudžbe.'],
             ['Pitanja o dostavi', 'Za promjenu adrese ili dodatne informacije javite nam se što prije na hello@domsvjetla.com i navedite broj narudžbe.'],
         ],

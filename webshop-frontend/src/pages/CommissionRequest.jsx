@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import API from '../api/axios';
+import { Link } from 'react-router-dom';
 
 const emptyForm = {
     customerName: '',
@@ -14,6 +15,7 @@ export default function CommissionRequest() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
     const updateField = (event) => {
         const { name, value } = event.target;
@@ -24,6 +26,10 @@ export default function CommissionRequest() {
         event.preventDefault();
         setErrorMessage('');
         setSuccessMessage('');
+        if (!privacyAccepted) {
+            setErrorMessage('Morate prihvatiti obradu podataka za slanje upita.');
+            return;
+        }
         setIsSubmitting(true);
 
         try {
@@ -39,7 +45,7 @@ export default function CommissionRequest() {
 
     return (
         <main className="mx-auto max-w-4xl px-5 py-10 sm:px-8 lg:py-16">
-            <p className="eyebrow mb-3">Narudžba slike</p>
+            <p className="eyebrow mb-3">Zahtjev za izradu slike</p>
             <h1 className="display-font mb-6 text-4xl font-bold text-ink">Zatražite izradu slike po narudžbi</h1>
 
             {successMessage && (
@@ -64,8 +70,18 @@ export default function CommissionRequest() {
                     <input className="input-field" name="budgetNote" value={form.budgetNote} onChange={updateField} placeholder="Napomena o budžetu ili uzoru (neobavezno)" />
                 </div>
 
-                <button type="submit" disabled={isSubmitting} className="mt-6 rounded-lg bg-burgundy px-5 py-3 font-semibold text-white hover:bg-burgundy-dark disabled:opacity-60">
-                    {isSubmitting ? 'Slanje...' : 'Pošalji zahtjev'}
+                <label className="mt-5 flex items-start gap-3 text-sm text-stone-600">
+                    <input type="checkbox" checked={privacyAccepted} onChange={(event) => setPrivacyAccepted(event.target.checked)} className="mt-1" />
+                    <span>Suglasan/a sam da se moji podaci (ime, e-mail) pohrane u svrhu obrade ovog upita i daljnje komunikacije putem e-pošte. (Obvezno)</span>
+                </label>
+                <label className="mt-3 flex items-start gap-3 text-sm text-stone-600">
+                    <input type="checkbox" className="mt-1" />
+                    <span>Želim primati obavijesti o novim djelima i izložbama.</span>
+                </label>
+                <p className="mt-3 text-xs leading-5 text-stone-500">Vaši su podaci sigurni. Pročitajte našu <Link to="/privatnost" className="underline">Izjavu o privatnosti</Link>.</p>
+
+                <button type="submit" disabled={isSubmitting || !privacyAccepted} className="mt-6 rounded-lg bg-burgundy px-5 py-3 font-semibold text-white hover:bg-burgundy-dark disabled:opacity-60">
+                    {isSubmitting ? 'Slanje...' : 'Pošalji upit za dogovor'}
                 </button>
             </form>
         </main>

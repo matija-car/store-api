@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 const statusLabels = {
     PENDING: 'Na čekanju',
+    INQUIRY: 'Upit zaprimljen',
     PAID: 'Plaćeno',
     SHIPPED: 'Poslano',
     DELIVERED: 'Dostavljeno',
@@ -36,7 +37,7 @@ export default function Orders() {
                     <Link key={order.id} to={`/orders/${order.id}`} className="rounded-2xl border border-amber-900/10 bg-white p-5 shadow-sm transition hover:border-gold">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <div>
-                                <h2 className="font-semibold text-ink">Narudžba #{order.id}</h2>
+                                <h2 className="font-semibold text-ink">Upit #{order.id}</h2>
                                 <p className="text-sm text-stone-500">{order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Datum nije dostupan'}</p>
                             </div>
                             <span className="rounded-full bg-cream px-3 py-1 text-sm font-semibold text-burgundy">{statusLabels[order.status] || order.status}</span>

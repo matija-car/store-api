@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { useStoreMode } from '../context/StoreModeContext';
 
 const statuses = ['PENDING', 'INQUIRY', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 const statusLabels = { PENDING: 'Na čekanju', INQUIRY: 'Upit', PAID: 'Plaćeno', SHIPPED: 'Poslano', DELIVERED: 'Dostavljeno', CANCELLED: 'Otkazano' };
@@ -12,8 +11,6 @@ export default function AdminOrders() {
     const [orders, setOrders] = useState([]);
     const [error, setError] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [settingsSaving, setSettingsSaving] = useState(false);
-    const { mode, setMode } = useStoreMode();
 
     const loadOrders = async () => {
         try {
@@ -27,19 +24,6 @@ export default function AdminOrders() {
     useEffect(() => {
         if (user?.role === 'ADMIN') loadOrders();
     }, [user, statusFilter]);
-
-    const updateStoreMode = async (nextMode) => {
-        setSettingsSaving(true);
-        setError('');
-        try {
-            await API.patch('/admin/store-settings', { mode: nextMode });
-            setMode(nextMode);
-        } catch (requestError) {
-            setError(requestError.response?.data?.message || 'Način rada nije moguće promijeniti.');
-        } finally {
-            setSettingsSaving(false);
-        }
-    };
 
     const updateStatus = async (order, status) => {
         setError('');
@@ -74,16 +58,6 @@ export default function AdminOrders() {
             <p className="eyebrow mb-2">Administracija</p>
             <h1 className="display-font mb-8 text-4xl font-bold text-ink">Upravljanje narudžbama</h1>
             {error && <p className="mb-5 rounded-lg bg-red-50 p-4 text-red-700">{error}</p>}
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-900/10 bg-cream p-5">
-                <div>
-                    <p className="font-semibold text-ink">Način rada trgovine</p>
-                    <p className="mt-1 text-sm text-stone-600">{mode === 'CATALOG' ? 'Kupci šalju upite, bez rezervacije zalihe.' : 'Kupci šalju narudžbe uz rezervaciju zalihe.'}</p>
-                </div>
-                <select className="input-field w-auto min-w-44" value={mode} disabled={settingsSaving} onChange={(event) => updateStoreMode(event.target.value)}>
-                    <option value="STORE">STORE — narudžbe</option>
-                    <option value="CATALOG">CATALOG — upiti</option>
-                </select>
-            </div>
             <div className="mb-5 flex items-center gap-3">
                 <label htmlFor="order-status-filter" className="text-sm font-semibold text-stone-700">Filter statusa</label>
                 <select id="order-status-filter" className="input-field w-auto min-w-44" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>

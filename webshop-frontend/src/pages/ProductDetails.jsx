@@ -72,7 +72,7 @@ export default function ProductDetails() {
 
                 <div className="flex flex-col justify-between p-7 sm:p-12">
                     <div>
-                        <p className="eyebrow mb-4">Duhovni dar</p>
+                        <p className="eyebrow mb-4">Umjetničko djelo</p>
                         <h1 className="display-font mb-5 text-4xl font-bold leading-tight text-ink sm:text-5xl">{product.name}</h1>
                         {product.pieceType === 'ORIGINAL' && (
                             <span className="mb-4 inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-900">Jedinstveni original</span>
@@ -83,6 +83,7 @@ export default function ProductDetails() {
                         <p className="mb-8 text-3xl font-bold text-burgundy">
                             {Number(product.price).toFixed(2)} €
                         </p>
+                        <p className="mb-6 text-sm text-stone-500">Informativna cijena. Konačan dogovor o cijeni, preuzimanju i isporuci odvija se putem e-pošte.</p>
                         <p className="mb-8 max-w-lg leading-8 text-stone-500">
                             {product.description || 'Nema opisa za ovaj artikl.'}
                         </p>
@@ -97,9 +98,9 @@ export default function ProductDetails() {
                         disabled={outOfStock}
                         className={`w-full rounded-lg py-4 font-semibold text-white transition ${outOfStock ? 'cursor-not-allowed bg-stone-400' : 'bg-burgundy hover:bg-burgundy-dark'} ${added ? 'scale-[.98] animate-pulse' : ''}`}
                     >
-                        {outOfStock ? 'Rasprodano' : added ? 'Dodano' : 'Dodaj u košaricu'}
+                        {outOfStock ? 'Nedostupno' : added ? 'Dodano u odabrana djela' : 'Pošalji upit za ovo djelo'}
                     </button>
-                    {added && <p className="mt-3 rounded-lg bg-cream px-4 py-3 text-center text-sm font-semibold text-burgundy">Dodano u košaricu</p>}
+                    {added && <p className="mt-3 rounded-lg bg-cream px-4 py-3 text-center text-sm font-semibold text-burgundy">Djelo je dodano u odabrana djela.</p>}
                 </div>
             </div>
             </main>
