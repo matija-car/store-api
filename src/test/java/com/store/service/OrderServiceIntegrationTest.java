@@ -6,15 +6,11 @@ import com.store.entity.Category;
 import com.store.entity.OrderStatus;
 import com.store.entity.Product;
 import com.store.entity.Role;
-import com.store.entity.StoreMode;
-import com.store.entity.StoreSettings;
 import com.store.entity.User;
-import com.store.exception.InsufficientStockException;
 import com.store.repository.CategoryRepository;
 import com.store.repository.OrderRepository;
 import com.store.repository.ProductRepository;
 import com.store.repository.UserRepository;
-import com.store.repository.StoreSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +19,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.junit.jupiter.api.AfterEach;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -43,7 +37,6 @@ class OrderServiceIntegrationTest {
     @Autowired private ProductRepository productRepository;
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private UserRepository userRepository;
-    @Autowired private StoreSettingsRepository storeSettingsRepository;
     @MockBean private EmailService emailService;
 
     private User user;
@@ -51,7 +44,6 @@ class OrderServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        storeSettingsRepository.save(new StoreSettings(1L, StoreMode.STORE));
         String suffix = UUID.randomUUID().toString();
         user = userRepository.save(User.builder()
                 .name("Order Tester")
@@ -65,21 +57,16 @@ class OrderServiceIntegrationTest {
                 2, null, null, category));
     }
 
-    @AfterEach
-    void resetStoreMode() {
-        storeSettingsRepository.save(new StoreSettings(1L, StoreMode.STORE));
-        SecurityContextHolder.clearContext();
-    }
-
     @Test
-    void createsOrderAndDecrementsStock() {
+    void createsInquiryWithoutDecrementingStock() {
         setAuthentication();
 
         OrderRequestDTO request = requestFor(1);
         var response = orderService.createOrder(request);
 
         assertEquals(new BigDecimal("12.50"), response.getTotalAmount());
-        assertEquals(1, productRepository.findById(product.getId()).orElseThrow().getStockQuantity());
+        assertEquals(OrderStatus.INQUIRY, response.getStatus());
+        assertEquals(2, productRepository.findById(product.getId()).orElseThrow().getStockQuantity());
     }
 
     @Test
@@ -90,7 +77,7 @@ class OrderServiceIntegrationTest {
         var response = orderService.createOrder(request);
 
         assertEquals(new BigDecimal("12.50"), response.getTotalAmount());
-        assertEquals(1, productRepository.findById(product.getId()).orElseThrow().getStockQuantity());
+        assertEquals(2, productRepository.findById(product.getId()).orElseThrow().getStockQuantity());
         assertNull(orderRepository.findById(response.getId()).orElseThrow().getUser());
     }
 
@@ -105,16 +92,16 @@ class OrderServiceIntegrationTest {
     }
 
     @Test
-    void insufficientStockLeavesStockUnchanged() {
+    void inquiryAllowsRequestedQuantityAboveCurrentStock() {
         setAuthentication();
 
-        assertThrows(InsufficientStockException.class, () -> orderService.createOrder(requestFor(3)));
+        var response = orderService.createOrder(requestFor(3));
+        assertEquals(OrderStatus.INQUIRY, response.getStatus());
         assertEquals(2, productRepository.findById(product.getId()).orElseThrow().getStockQuantity());
     }
 
     @Test
-    void catalogInquiryDoesNotDecrementStockAndSendsNotifications() {
-        storeSettingsRepository.save(new StoreSettings(1L, StoreMode.CATALOG));
+    void inquirySendsNotifications() {
         setAuthentication();
 
         var response = orderService.createOrder(requestFor(2));
@@ -126,8 +113,7 @@ class OrderServiceIntegrationTest {
     }
 
     @Test
-    void catalogInquiryCanTransitionToPaidOrCancelled() {
-        storeSettingsRepository.save(new StoreSettings(1L, StoreMode.CATALOG));
+    void inquiryCanTransitionToPaidOrCancelled() {
         setAuthentication();
         var response = orderService.createOrder(requestFor(1));
 
@@ -136,36 +122,6 @@ class OrderServiceIntegrationTest {
         var secondResponse = orderService.createOrder(requestFor(1));
         assertEquals(OrderStatus.CANCELLED,
                 orderService.updateStatus(secondResponse.getId(), OrderStatus.CANCELLED).getStatus());
-    }
-
-    @Test
-    void concurrentOrdersCannotBothBuyTheLastUnit() throws Exception {
-        product.setStockQuantity(1);
-        productRepository.saveAndFlush(product);
-
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        CountDownLatch start = new CountDownLatch(1);
-        Callable<Boolean> attempt = () -> {
-            start.await();
-            setAuthentication();
-            try {
-                orderService.createOrder(requestFor(1));
-                return true;
-            } catch (RuntimeException ignored) {
-                return false;
-            }
-        };
-
-        Future<Boolean> first = executor.submit(attempt);
-        Future<Boolean> second = executor.submit(attempt);
-        start.countDown();
-
-        int successes = (first.get(10, TimeUnit.SECONDS) ? 1 : 0)
-                + (second.get(10, TimeUnit.SECONDS) ? 1 : 0);
-        executor.shutdownNow();
-
-        assertEquals(1, successes);
-        assertEquals(0, productRepository.findById(product.getId()).orElseThrow().getStockQuantity());
     }
 
     @Test

@@ -60,8 +60,6 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.GET, "/commission-requests").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.PATCH, "/commission-requests/*/status").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.POST, "/orders/**").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/store-settings").permitAll()
-                            .requestMatchers(HttpMethod.PATCH, "/admin/store-settings").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.GET, "/orders").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.GET, "/orders/me").authenticated()
                             .requestMatchers(HttpMethod.GET, "/orders/*").authenticated()
