@@ -24,6 +24,10 @@ jobs:
       - name: Run tests
         run: mvn test --batch-mode --no-transfer-progress
 
+      - name: Scan Maven dependencies
+        continue-on-error: true
+        run: mvn org.owasp:dependency-check-maven:check --batch-mode --no-transfer-progress -DfailBuildOnCVSS=7
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()

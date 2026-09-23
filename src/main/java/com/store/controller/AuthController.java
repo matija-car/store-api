@@ -14,6 +14,7 @@ import com.store.security.JwtTokenProvider;
 import com.store.service.PasswordResetService;
 import com.store.service.RefreshTokenService;
 import com.store.service.AuthRateLimiter;
+import com.store.service.EmailVerificationService;
 import com.store.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,6 +40,7 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final PasswordResetService passwordResetService;
     private final AuthRateLimiter authRateLimiter;
+    private final EmailVerificationService emailVerificationService;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
@@ -51,6 +53,7 @@ public class AuthController {
         enforceRateLimit("register", request, registerRequest.getEmail());
 
         UserDto createdUser = userService.createUser(registerRequest);
+        emailVerificationService.issueVerificationEmail(createdUser.getEmail());
         Role role = createdUser.getRole() == null ? Role.CUSTOMER : createdUser.getRole();
 
         var location = uriComponentsBuilder
@@ -76,6 +79,8 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest loginRequest,
             HttpServletRequest request) {
+        // DECISION NEEDED: Unverified users currently may log in; enforce verification
+        // here only after the product owner chooses between blocking or reduced access.
         enforceRateLimit("login", request, loginRequest.getEmail());
         boolean isValid = userService.verifyCredentials(loginRequest.getEmail(), loginRequest.getPassword());
 
@@ -145,6 +150,12 @@ public class AuthController {
         enforceRateLimit("forgot-password", request, forgotPasswordRequest.getEmail());
         passwordResetService.requestReset(forgotPasswordRequest.getEmail());
         return ResponseEntity.accepted().build();
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<Void> verifyEmail(@RequestParam String token) {
+        emailVerificationService.verifyEmail(token);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/reset-password")

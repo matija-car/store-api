@@ -6,7 +6,7 @@ A REST API for managing an online store — users, products, categories, and aut
 
 - Java 17 + Spring Boot 3.2
 - Spring Security + JWT
-- MySQL (Docker / Railway) / H2 (local dev)
+- PostgreSQL (Docker / Railway) / H2 (local dev)
 - Flyway for migrations
 - Swagger UI for API docs
 
@@ -36,13 +36,13 @@ Just run the app from IntelliJ or:
 ./mvnw spring-boot:run
 ```
 
-### Run with Docker (MySQL)
+### Run with Docker (PostgreSQL)
 
 ```bash
 docker-compose up --build
 ```
 
-That's it. Docker pulls MySQL automatically, runs migrations, and starts the app.
+That's it. Docker pulls PostgreSQL automatically, runs migrations, and starts the app.
 
 To stop:
 ```bash
@@ -98,6 +98,8 @@ src/
 
 Includes integration tests for services and controller tests with MockMvc.
 
+Auth rate limiting is in-memory and per-instance; if this app is ever scaled
+horizontally, move it to a shared store (e.g. Redis) or a platform-level rate limiter.
 
 > ### Planned features
 > User addresses

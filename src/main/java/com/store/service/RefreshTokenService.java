@@ -71,7 +71,12 @@ public class RefreshTokenService {
     private RefreshToken findActiveToken(String rawToken) {
         RefreshToken token = refreshTokenRepository.findByTokenHash(hash(rawToken))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
-        if (token.isRevoked() || token.isExpired()) {
+        if (token.isRevoked()) {
+            log.warn("Refresh token reuse detected for user id {}", token.getUser().getId());
+            revokeAllForUser(token.getUser());
+            throw new IllegalArgumentException("Invalid or expired refresh token");
+        }
+        if (token.isExpired()) {
             throw new IllegalArgumentException("Invalid or expired refresh token");
         }
         return token;

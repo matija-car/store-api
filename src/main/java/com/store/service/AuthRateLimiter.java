@@ -15,6 +15,7 @@ public class AuthRateLimiter {
     private static final int MAX_REGISTER_ATTEMPTS = 5;
     private static final int MAX_FORGOT_PASSWORD_ATTEMPTS = 5;
 
+    // In-memory and per-instance only; horizontal scaling requires a shared limiter.
     private final Map<String, Window> windows = new ConcurrentHashMap<>();
 
     public boolean allow(String endpoint, HttpServletRequest request, String email) {

@@ -7,10 +7,12 @@ import com.store.dto.UserDto;
 import com.store.entity.User;
 import com.store.exception.ResourceNotFoundException;
 import com.store.repository.UserRepository;
+import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +22,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @Transactional
@@ -35,6 +39,12 @@ class UserServiceIntegrationTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailVerificationService emailVerificationService;
+
+    @MockBean
+    private EmailService emailService;
 
     private RegisterUserRequest registerRequest;
 
@@ -56,6 +66,24 @@ class UserServiceIntegrationTest {
         User savedUser = userRepository.findById(createdUser.getId()).orElse(null);
         assertNotNull(savedUser);
         assertTrue(passwordEncoder.matches("password123", savedUser.getPassword()));
+    }
+
+    @Test
+    @DisplayName("Should verify a registered user's email")
+    void testEmailVerification() {
+        UserDto createdUser = userService.createUser(registerRequest);
+
+        emailVerificationService.issueVerificationEmail(createdUser.getEmail());
+
+        ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
+        verify(emailService).sendEmailVerificationEmail(eq(createdUser.getEmail()), linkCaptor.capture());
+        String link = linkCaptor.getValue();
+        String rawToken = link.substring(link.indexOf("token=") + "token=".length());
+
+        emailVerificationService.verifyEmail(rawToken);
+
+        User savedUser = userRepository.findById(createdUser.getId()).orElseThrow();
+        assertTrue(savedUser.isEmailVerified());
     }
 
     @Test

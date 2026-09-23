@@ -5,6 +5,7 @@ import com.store.dto.LoginRequest;
 import com.store.dto.RegisterUserRequest;
 import com.store.dto.UserDto;
 import com.store.security.JwtTokenProvider;
+import com.store.service.EmailVerificationService;
 import com.store.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class AuthControllerTest {
 
     @MockBean
     private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private EmailVerificationService emailVerificationService;
 
     private RegisterUserRequest registerRequest;
     private LoginRequest loginRequest;

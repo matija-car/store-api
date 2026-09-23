@@ -164,4 +164,23 @@ class ProductControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Product not found with id: 999"));
     }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("Should return 400 for malformed JSON")
+    void testMalformedJsonReturnsBadRequest() throws Exception {
+        mockMvc.perform(post("/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Malformed request body"));
+    }
+
+    @Test
+    @DisplayName("Should return 400 for an invalid product ID")
+    void testInvalidProductIdReturnsBadRequest() throws Exception {
+        mockMvc.perform(get("/products/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid value for parameter 'id'"));
+    }
 }

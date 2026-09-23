@@ -12,7 +12,6 @@ import java.time.Instant;
 @AllArgsConstructor
 @Entity
 @Table(name = "email_verification_tokens")
-// TODO: Planned feature; add token issuance and verification services before enabling it.
 public class EmailVerificationToken {
 
     @Id
@@ -28,6 +27,9 @@ public class EmailVerificationToken {
 
     @Column(name = "expiry_date", nullable = false)
     private Instant expiryDate;
+
+    @Column(name = "used", nullable = false)
+    private boolean used;
 
     public boolean isExpired() {
         return Instant.now().isAfter(expiryDate);

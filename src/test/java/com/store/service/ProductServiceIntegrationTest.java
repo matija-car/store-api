@@ -5,6 +5,7 @@ import com.store.entity.Category;
 import com.store.entity.Product;
 import com.store.exception.ResourceNotFoundException;
 import com.store.repository.CategoryRepository;
+import com.store.repository.OrderRepository;
 import com.store.repository.ProductRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,9 @@ class ProductServiceIntegrationTest {
     private ProductRepository productRepository;
 
     @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
     private CategoryRepository categoryRepository;
 
     // Potreban za rjesavanje Hibernate flush ordering problema:
@@ -48,6 +52,7 @@ class ProductServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        orderRepository.deleteAll();
         productRepository.deleteAll();
         categoryRepository.deleteAll();
 
