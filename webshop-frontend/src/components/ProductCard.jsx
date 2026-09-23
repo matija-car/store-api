@@ -5,8 +5,10 @@ import { useCart } from '../context/CartContext';
 export default function ProductCard({ product }) {
     const { addToCart } = useCart();
     const [added, setAdded] = useState(false);
+    const outOfStock = (product.stockQuantity ?? 0) <= 0;
 
     const handleAddToCart = () => {
+        if (outOfStock) return;
         addToCart(product);
         setAdded(true);
     };
@@ -43,6 +45,12 @@ export default function ProductCard({ product }) {
                     <h3 className="display-font mb-1 truncate text-lg font-bold text-ink">
                         {product.name}
                     </h3>
+                    {product.pieceType === 'ORIGINAL' && (
+                        <span className="mb-2 inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-amber-900">Jedinstveni original</span>
+                    )}
+                    {product.causeEnabled && product.causeDescription && (
+                        <p className="mb-2 rounded-md bg-rose-50 px-2 py-1 text-[0.7rem] font-medium text-burgundy">{product.causeDescription}</p>
+                    )}
                     <p className="mb-1 line-clamp-1 text-sm text-stone-500">
                         {product.description || 'Originalni umjetnički rad.'}
                     </p>
@@ -64,9 +72,10 @@ export default function ProductCard({ product }) {
                     </Link>
                     <button
                         onClick={handleAddToCart}
-                        className={`rounded-lg bg-burgundy px-3 py-2 text-xs font-semibold text-white transition hover:bg-burgundy-dark ${added ? 'scale-95 animate-pulse' : ''}`}
+                        disabled={outOfStock}
+                        className={`rounded-lg px-3 py-2 text-xs font-semibold text-white transition ${outOfStock ? 'cursor-not-allowed bg-stone-400' : 'bg-burgundy hover:bg-burgundy-dark'} ${added ? 'scale-95 animate-pulse' : ''}`}
                     >
-                        {added ? 'Dodano' : 'Dodaj'}
+                        {outOfStock ? 'Rasprodano' : added ? 'Dodano' : 'Dodaj'}
                     </button>
                 </div>
             </div>

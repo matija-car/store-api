@@ -1,0 +1,2 @@
+ALTER TABLE products ADD COLUMN cause_enabled BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE products ADD COLUMN cause_description TEXT NULL;

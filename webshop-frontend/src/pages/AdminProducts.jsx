@@ -10,6 +10,9 @@ const emptyForm = {
     stockQuantity: 0,
     categoryId: '',
     imageUrl: '',
+    pieceType: 'PRINT',
+    causeEnabled: false,
+    causeDescription: '',
 };
 
 export default function AdminProducts() {
@@ -35,8 +38,11 @@ export default function AdminProducts() {
     }, [user]);
 
     const updateField = (event) => {
-        const { name, value } = event.target;
-        setForm((current) => ({ ...current, [name]: value }));
+        const { name, value, type, checked } = event.target;
+        setForm((current) => ({
+            ...current,
+            [name]: type === 'checkbox' ? checked : value,
+        }));
     };
 
     const resetForm = () => {
@@ -53,6 +59,9 @@ export default function AdminProducts() {
             price: Number(form.price),
             stockQuantity: Number(form.stockQuantity),
             categoryId: form.categoryId ? Number(form.categoryId) : null,
+            pieceType: form.pieceType || 'PRINT',
+            causeEnabled: Boolean(form.causeEnabled),
+            causeDescription: form.causeEnabled ? form.causeDescription : '',
         };
 
         try {
@@ -79,6 +88,9 @@ export default function AdminProducts() {
             stockQuantity: product.stockQuantity ?? 0,
             categoryId: product.categoryId ?? '',
             imageUrl: product.imageUrl || '',
+            pieceType: product.pieceType || 'PRINT',
+            causeEnabled: Boolean(product.causeEnabled),
+            causeDescription: product.causeDescription || '',
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -108,6 +120,28 @@ export default function AdminProducts() {
                 <input className="input-field" name="stockQuantity" type="number" min="0" value={form.stockQuantity} onChange={updateField} placeholder="Količina" required />
                 <input className="input-field" name="categoryId" type="number" min="1" value={form.categoryId} onChange={updateField} placeholder="ID kategorije (opcionalno)" />
                 <input className="input-field md:col-span-2" name="imageUrl" value={form.imageUrl} onChange={updateField} placeholder="URL slike" />
+                <div className="md:col-span-2">
+                    <label className="mb-2 block text-sm font-semibold text-stone-700">Vrsta</label>
+                    <select className="input-field" name="pieceType" value={form.pieceType} onChange={updateField}>
+                        <option value="ORIGINAL">Original</option>
+                        <option value="PRINT">Print</option>
+                    </select>
+                </div>
+                <div className="md:col-span-2 rounded-xl border border-amber-900/10 bg-cream p-4">
+                    <label className="flex items-center gap-3 text-sm font-semibold text-stone-700">
+                        <input type="checkbox" name="causeEnabled" checked={Boolean(form.causeEnabled)} onChange={updateField} />
+                        Istakni kao humanitarni proizvod mjeseca
+                    </label>
+                    {form.causeEnabled && (
+                        <textarea
+                            className="input-field mt-3 min-h-20"
+                            name="causeDescription"
+                            value={form.causeDescription}
+                            onChange={updateField}
+                            placeholder="Opis svrhe, npr. 20 % prihoda podržava..."
+                        />
+                    )}
+                </div>
                 <textarea className="input-field min-h-28 md:col-span-2" name="description" value={form.description} onChange={updateField} placeholder="Opis proizvoda" required />
                 <div className="flex gap-3 md:col-span-2">
                     <button className="rounded-lg bg-burgundy px-5 py-3 font-semibold text-white hover:bg-burgundy-dark" type="submit">{editingId ? 'Spremi promjene' : 'Dodaj proizvod'}</button>

@@ -14,6 +14,20 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Product {
 
+    public Product(Long id, String name, String description, BigDecimal price, Integer stockQuantity,
+                   String imageUrl, LocalDateTime createdAt, Category category) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+        this.imageUrl = imageUrl;
+        this.createdAt = createdAt;
+        this.category = category;
+        this.pieceType = PieceType.PRINT;
+        this.causeEnabled = false;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +45,16 @@ public class Product {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "piece_type", nullable = false, length = 20)
+    private PieceType pieceType = PieceType.PRINT;
+
+    @Column(name = "cause_enabled", nullable = false)
+    private boolean causeEnabled = false;
+
+    @Column(name = "cause_description")
+    private String causeDescription;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

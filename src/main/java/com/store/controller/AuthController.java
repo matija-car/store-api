@@ -66,7 +66,7 @@ public class AuthController {
                 .name(createdUser.getName())
                 .email(createdUser.getEmail())
                 .role(role)
-                .message("User registered successfully")
+                .message("User registered successfully. Check your email to verify your account.")
                 .build();
 
         return ResponseEntity.created(location).body(response);
@@ -97,10 +97,15 @@ public class AuthController {
             user = new UserDto(null, null, loginRequest.getEmail());
         }
         Role role = user.getRole() == null ? Role.CUSTOMER : user.getRole();
+        User authenticatedUser = user.getId() == null
+                ? null
+                : userService.getUserEntityByEmail(loginRequest.getEmail());
+        String tokenEmail = authenticatedUser == null
+                ? loginRequest.getEmail().trim().toLowerCase(java.util.Locale.ROOT)
+                : authenticatedUser.getEmail();
         String token = role == Role.CUSTOMER
-                ? jwtTokenProvider.generateToken(loginRequest.getEmail())
-                : jwtTokenProvider.generateToken(loginRequest.getEmail(), role);
-        User authenticatedUser = userService.getUserEntityByEmail(loginRequest.getEmail());
+                ? jwtTokenProvider.generateToken(tokenEmail)
+                : jwtTokenProvider.generateToken(tokenEmail, role);
         String refreshToken = authenticatedUser == null
                 ? null
                 : refreshTokenService.issueToken(authenticatedUser);

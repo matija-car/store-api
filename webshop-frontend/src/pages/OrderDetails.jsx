@@ -52,6 +52,12 @@ export default function OrderDetails() {
                     <p className="eyebrow mb-3">Dostava</p>
                     <p className="font-semibold">{order.customerName}</p>
                     <p className="mt-2 text-sm text-stone-600">{order.shippingAddress}<br />{order.postalCode} {order.city}</p>
+                    {order.prayerRequest && (
+                        <div className="mt-4 rounded-xl border border-amber-200 bg-white p-3 text-sm text-stone-700">
+                            <p className="mb-1 font-semibold text-ink">Molitvena nakana</p>
+                            <p>{order.prayerRequest}</p>
+                        </div>
+                    )}
                     <p className="mt-4 border-t border-stone-300/70 pt-4 text-xl font-bold">{Number(order.totalAmount).toFixed(2)} €</p>
                 </aside>
             </div>

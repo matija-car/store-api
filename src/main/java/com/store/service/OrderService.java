@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -35,11 +36,7 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO request) {
-        String currentEmail = (String) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        User currentUser = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + currentEmail));
+        User currentUser = findAuthenticatedUser();
 
         Order order = Order.builder()
                 .user(currentUser)
@@ -48,6 +45,7 @@ public class OrderService {
                 .shippingAddress(request.getShippingAddress())
                 .city(request.getCity())
                 .postalCode(request.getPostalCode())
+                .prayerRequest(request.getPrayerRequest())
                 .status(OrderStatus.PENDING)
                 .items(new ArrayList<>())
                 .build();
@@ -81,6 +79,18 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
 
         return toResponseDTO(savedOrder);
+    }
+
+    private User findAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof String email)
+                || "anonymousUser".equals(email)) {
+            return null;
+        }
+
+        return userRepository.findByEmailIgnoreCase(email.trim()).orElse(null);
     }
 
     @Transactional(readOnly = true)
@@ -162,6 +172,7 @@ public class OrderService {
                 .shippingAddress(order.getShippingAddress())
                 .city(order.getCity())
                 .postalCode(order.getPostalCode())
+                .prayerRequest(order.getPrayerRequest())
                 .totalAmount(order.getTotalAmount())
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt())

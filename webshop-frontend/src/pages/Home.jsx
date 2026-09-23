@@ -4,6 +4,13 @@ import API from '../api/axios';
 import ProductCard from '../components/ProductCard';
 
 const PAGE_SIZE = 12;
+const categoryNames = {
+    Electronics: 'Elektronika',
+    Books: 'Knjige',
+    Clothing: 'Odjeća',
+    Furniture: 'Namještaj',
+    Sports: 'Sport',
+};
 
 export default function Home() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -61,7 +68,7 @@ export default function Home() {
                 setLoading(false);
             })
             .catch(() => {
-                setError('Neuspjelo spajanje s backendom.');
+                setError('Nije moguće povezati se s poslužiteljem. Provjerite radi li backend na http://localhost:8080.');
                 setLoading(false);
             });
     }, [search, categoryId, minPrice, maxPrice, sort, page]);
@@ -77,7 +84,7 @@ export default function Home() {
             <section id="collection" className="mx-auto max-w-7xl px-4 py-8 sm:px-8 lg:py-12">
                 <div className="mb-8 grid gap-3 border-b border-stone-200 pb-6 md:grid-cols-5">
                     <label className="md:col-span-2"><span className="sr-only">Pretraži proizvode</span><input value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder="Pretraži proizvode..." className="input-field" /></label>
-                    <select value={categoryId} onChange={(event) => updateParams({ categoryId: event.target.value, page: 0 })} className="input-field"><option value="">Sve kategorije</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select>
+                    <select value={categoryId} onChange={(event) => updateParams({ categoryId: event.target.value, page: 0 })} className="input-field"><option value="">Sve kategorije</option>{categories.map((category) => <option key={category.id} value={category.id}>{categoryNames[category.name] || category.name}</option>)}</select>
                     <input value={minPrice} onChange={(event) => updateParams({ minPrice: event.target.value, page: 0 })} type="number" min="0" step="0.01" placeholder="Min. cijena" className="input-field" />
                     <input value={maxPrice} onChange={(event) => updateParams({ maxPrice: event.target.value, page: 0 })} type="number" min="0" step="0.01" placeholder="Max. cijena" className="input-field" />
                     <select value={sort} onChange={(event) => updateParams({ sort: event.target.value === 'featured' ? null : event.target.value, page: 0 })} className="input-field"><option value="featured">Preporučeno</option><option value="price-low">Cijena: niža → viša</option><option value="price-high">Cijena: viša → niža</option></select>

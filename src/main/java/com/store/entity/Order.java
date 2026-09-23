@@ -40,6 +40,9 @@ public class Order {
     @Column(name = "postal_code", nullable = false)
     private String postalCode;
 
+    @Column(name = "prayer_request")
+    private String prayerRequest;
+
     @Column(name = "total_amount", nullable = false)
     private BigDecimal totalAmount;
 

@@ -56,7 +56,10 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/products/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
-                            .requestMatchers(HttpMethod.POST, "/orders/**").authenticated()
+                            .requestMatchers(HttpMethod.POST, "/commission-requests").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/commission-requests").hasRole("ADMIN")
+                            .requestMatchers(HttpMethod.PATCH, "/commission-requests/*/status").hasRole("ADMIN")
+                            .requestMatchers(HttpMethod.POST, "/orders/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/orders").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.GET, "/orders/me").authenticated()
                             .requestMatchers(HttpMethod.GET, "/orders/*").authenticated()
@@ -96,7 +99,7 @@ public class SecurityConfig {
                 .map(String::trim)
                 .filter(origin -> !origin.isBlank())
                 .toList());
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
         configuration.setAllowCredentials(true);
 

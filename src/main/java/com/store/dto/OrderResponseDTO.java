@@ -19,6 +19,7 @@ public class OrderResponseDTO {
     private String shippingAddress;
     private String city;
     private String postalCode;
+    private String prayerRequest;
     private BigDecimal totalAmount;
     private OrderStatus status;
     private LocalDateTime createdAt;

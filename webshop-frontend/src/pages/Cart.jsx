@@ -1,23 +1,45 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import API from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function Cart() {
     const { cart, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
     const { token } = useAuth();
-    const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [customer, setCustomer] = useState({ customerName: '', customerEmail: '', shippingAddress: '', city: '', postalCode: '' });
+    const [guestOrderEmail, setGuestOrderEmail] = useState('');
+    const [customer, setCustomer] = useState({ customerName: '', customerEmail: '', shippingAddress: '', city: '', postalCode: '', prayerRequest: '' });
 
     const handleCheckout = async () => {
-        if (!token) {
-            setErrorMessage('Morate biti prijavljeni kako biste završili narudžbu.');
-            setTimeout(() => navigate('/login'), 2000);
+        const trimmedCustomer = Object.fromEntries(
+            Object.entries(customer).map(([key, value]) => [key, value.trim()]),
+        );
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        const namePattern = /^[\p{L}][\p{L} .'-]*$/u;
+        const postalPattern = /^[0-9]{4,10}$/;
+
+        if (!namePattern.test(trimmedCustomer.customerName) || trimmedCustomer.customerName.length > 100) {
+            setErrorMessage('Unesite ispravno ime i prezime.');
+            return;
+        }
+        if (!emailPattern.test(trimmedCustomer.customerEmail) || trimmedCustomer.customerEmail.length > 254) {
+            setErrorMessage('Unesite ispravnu e-mail adresu.');
+            return;
+        }
+        if (trimmedCustomer.shippingAddress.length < 3 || trimmedCustomer.shippingAddress.length > 255) {
+            setErrorMessage('Unesite ispravnu adresu dostave.');
+            return;
+        }
+        if (!namePattern.test(trimmedCustomer.city) || trimmedCustomer.city.length > 100) {
+            setErrorMessage('Unesite ispravan grad.');
+            return;
+        }
+        if (!postalPattern.test(trimmedCustomer.postalCode)) {
+            setErrorMessage('Poštanski broj mora imati 4 do 10 znamenki.');
             return;
         }
 
@@ -27,7 +49,8 @@ export default function Cart() {
 
         try {
             const orderPayload = {
-                ...customer,
+                ...trimmedCustomer,
+                prayerRequest: trimmedCustomer.prayerRequest || null,
                 items: cart.map((item) => ({
                     productId: item.id,
                     quantity: item.quantity,
@@ -36,11 +59,15 @@ export default function Cart() {
 
             await API.post('/orders', orderPayload);
             setSuccessMessage('Narudžba je uspješno zaprimljena!');
+            if (!token) setGuestOrderEmail(trimmedCustomer.customerEmail);
             clearCart();
         } catch (err) {
             console.error('Greška pri slanju narudžbe:', err);
+            const validationErrors = err.response?.data?.validationErrors;
             setErrorMessage(
-                err.response?.data?.message || 'Slani zahtjev nije uspio. Provjerite vezu s backendom.'
+                validationErrors
+                    ? Object.values(validationErrors).join(' ')
+                    : err.response?.data?.message || 'Slanje zahtjeva nije uspjelo.',
             );
         } finally {
             setLoading(false);
@@ -66,6 +93,18 @@ export default function Cart() {
             {successMessage && (
                 <div className="mb-6 p-4 bg-green-50 text-green-700 rounded border border-green-200 text-center">
                     {successMessage}
+                    {guestOrderEmail && (
+                        <p className="mt-2 text-sm">
+                            Ako se registrirate ili prijavite s adresom <strong>{guestOrderEmail}</strong>,
+                            ova će se narudžba povezati s vašim računom i moći ćete je pratiti u{' '}
+                            <Link
+                                to={`/login?email=${encodeURIComponent(guestOrderEmail)}`}
+                                className="font-semibold underline"
+                            >
+                                Mojim narudžbama
+                            </Link>.
+                        </p>
+                    )}
                 </div>
             )}
 
@@ -131,7 +170,17 @@ export default function Cart() {
                                 ['shippingAddress', 'Adresa dostave', 'text'],
                                 ['city', 'Grad', 'text'],
                                 ['postalCode', 'Poštanski broj', 'text'],
-                            ].map(([name, label, type]) => <input key={name} required type={type} placeholder={label} value={customer[name]} onChange={(e) => setCustomer({ ...customer, [name]: e.target.value })} className="input-field" />)}
+                            ].map(([name, label, type]) => <input key={name} required type={type} minLength={name === 'postalCode' ? 4 : undefined} maxLength={name === 'postalCode' ? 10 : name === 'customerEmail' ? 254 : name === 'shippingAddress' ? 255 : 100} pattern={name === 'customerEmail' ? '[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}' : name === 'postalCode' ? '[0-9]{4,10}' : undefined} inputMode={name === 'postalCode' ? 'numeric' : undefined} placeholder={label} value={customer[name]} onChange={(e) => setCustomer({ ...customer, [name]: e.target.value })} className="input-field" />)}
+                        </div>
+                        <div className="mt-6">
+                            <label className="mb-2 block text-sm font-semibold text-stone-700">Postoji li posebna molitvena nakana ili životno razdoblje za koje možemo moliti dok pakiramo vašu narudžbu?</label>
+                            <textarea
+                                value={customer.prayerRequest}
+                                maxLength={1000}
+                                onChange={(e) => setCustomer({ ...customer, prayerRequest: e.target.value })}
+                                placeholder="Neobavezno — kratka molitvena poruka za naš tim"
+                                className="input-field min-h-24"
+                            />
                         </div>
                         <div className="mt-6 flex items-center justify-between gap-4 border-t border-stone-300/70 pt-5">
                         <div>

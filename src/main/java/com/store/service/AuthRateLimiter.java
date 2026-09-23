@@ -24,8 +24,9 @@ public class AuthRateLimiter {
         long now = Instant.now().getEpochSecond();
         int limit = switch (endpoint) {
             case "login" -> MAX_LOGIN_ATTEMPTS;
-            case "register", "forgot-password" -> endpoint.equals("register")
-                    ? MAX_REGISTER_ATTEMPTS : MAX_FORGOT_PASSWORD_ATTEMPTS;
+            case "register" -> MAX_REGISTER_ATTEMPTS;
+            case "forgot-password" -> MAX_FORGOT_PASSWORD_ATTEMPTS;
+            case "commission-request" -> MAX_REGISTER_ATTEMPTS;
             default -> 1;
         };
         Window window = windows.compute(key, (ignored, current) -> {

@@ -1,5 +1,6 @@
 package com.store.dto;
 
+import com.store.entity.PieceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,9 @@ public class ProductDto {
     private Long categoryId;
     private String categoryName;
     private String imageUrl;
+    private PieceType pieceType;
+    private boolean causeEnabled;
+    private String causeDescription;
 
     public ProductDto(Long id, String name, BigDecimal price, String description, Integer categoryId) {
         this.id = id;
@@ -27,6 +31,7 @@ public class ProductDto {
         this.price = price;
         this.description = description;
         this.categoryId = categoryId == null ? null : categoryId.longValue();
+        this.pieceType = PieceType.PRINT;
     }
 
     public ProductDto(Long id, String name, BigDecimal price, String description, Long categoryId) {
@@ -35,6 +40,7 @@ public class ProductDto {
         this.price = price;
         this.description = description;
         this.categoryId = categoryId;
+        this.pieceType = PieceType.PRINT;
     }
 
     public void setCategoryId(Number categoryId) {

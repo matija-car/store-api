@@ -46,9 +46,9 @@ export default function AdminOrders() {
                     <thead className="border-b border-stone-100 bg-cream"><tr><th className="p-4">Narudžba</th><th className="p-4">Kupac</th><th className="p-4">Datum</th><th className="p-4">Ukupno</th><th className="p-4">Status</th></tr></thead>
                     <tbody>
                         {orders.map((order) => (
-                            <tr key={order.id} className="border-b border-stone-100 last:border-0">
+                            <tr key={order.id} className="border-b border-stone-100 last:border-0 align-top">
                                 <td className="p-4 font-semibold text-ink">#{order.id}</td>
-                                <td className="p-4">{order.customerName}<br /><span className="text-stone-500">{order.customerEmail}</span></td>
+                                <td className="p-4">{order.customerName}<br /><span className="text-stone-500">{order.customerEmail}</span>{order.prayerRequest && <><br /><span className="mt-2 block rounded-md bg-amber-50 p-2 text-xs text-stone-700">Molitvena nakana: {order.prayerRequest}</span></>}</td>
                                 <td className="p-4 text-stone-500">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-'}</td>
                                 <td className="p-4 font-semibold">{Number(order.totalAmount).toFixed(2)} €</td>
                                 <td className="p-4"><select className="input-field min-w-36" value={order.status} onChange={(event) => updateStatus(order, event.target.value)}>{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></td>

@@ -7,6 +7,8 @@ import com.store.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.mail.MailException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
@@ -20,6 +22,7 @@ import java.util.HexFormat;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailVerificationService {
 
     private static final long TOKEN_TTL_HOURS = 24;
@@ -34,7 +37,9 @@ public class EmailVerificationService {
 
     @Transactional
     public void issueVerificationEmail(String email) {
-        User user = userRepository.findByEmail(email)
+        String normalizedEmail = email.trim();
+        User user = userRepository.findByEmail(normalizedEmail)
+                .or(() -> userRepository.findByEmailIgnoreCase(normalizedEmail))
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         String rawToken = generateRawToken();
 
@@ -45,9 +50,13 @@ public class EmailVerificationService {
                 .used(false)
                 .build());
 
-        emailService.sendEmailVerificationEmail(
-                email,
-                frontendUrl + "/verify-email?token=" + rawToken);
+        try {
+            emailService.sendEmailVerificationEmail(
+                    user.getEmail(),
+                    frontendUrl + "/verify-email?token=" + rawToken);
+        } catch (MailException ex) {
+            log.warn("Verification email could not be sent to {}. Registration remains successful.", user.getEmail());
+        }
     }
 
     @Transactional

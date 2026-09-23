@@ -62,6 +62,9 @@ public class ProductService {
         product.setPrice(productRequest.getPrice());
         product.setStockQuantity(productRequest.getStockQuantity() == null ? 0 : productRequest.getStockQuantity());
         product.setImageUrl(productRequest.getImageUrl());
+        product.setPieceType(productRequest.getPieceType() == null ? com.store.entity.PieceType.PRINT : productRequest.getPieceType());
+        product.setCauseEnabled(productRequest.isCauseEnabled());
+        product.setCauseDescription(productRequest.getCauseDescription());
         product.setCategory(category);
 
         Product savedProduct = productRepository.save(product);
@@ -85,6 +88,9 @@ public class ProductService {
                 ? product.getStockQuantity()
                 : productRequest.getStockQuantity());
         product.setImageUrl(productRequest.getImageUrl());
+        product.setPieceType(productRequest.getPieceType() == null ? com.store.entity.PieceType.PRINT : productRequest.getPieceType());
+        product.setCauseEnabled(productRequest.isCauseEnabled());
+        product.setCauseDescription(productRequest.getCauseDescription());
         product.setCategory(category);
 
         Product updatedProduct = productRepository.save(product);
@@ -106,6 +112,9 @@ public class ProductService {
         dto.setPrice(product.getPrice());
         dto.setStockQuantity(product.getStockQuantity());
         dto.setImageUrl(product.getImageUrl());
+        dto.setPieceType(product.getPieceType() == null ? com.store.entity.PieceType.PRINT : product.getPieceType());
+        dto.setCauseEnabled(product.isCauseEnabled());
+        dto.setCauseDescription(product.getCauseDescription());
         if (product.getCategory() != null) {
             dto.setCategoryId(product.getCategory().getId());
             dto.setCategoryName(product.getCategory().getName());
@@ -129,6 +138,9 @@ public class ProductService {
                 .stockQuantity(productDto.getStockQuantity())
                 .categoryId(productDto.getCategoryId())
                 .imageUrl(productDto.getImageUrl())
+                .pieceType(productDto.getPieceType() == null ? com.store.entity.PieceType.PRINT : productDto.getPieceType())
+                .causeEnabled(productDto.isCauseEnabled())
+                .causeDescription(productDto.getCauseDescription())
                 .build();
     }
 }

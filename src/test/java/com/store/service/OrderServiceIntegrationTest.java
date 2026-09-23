@@ -68,6 +68,28 @@ class OrderServiceIntegrationTest {
     }
 
     @Test
+    void guestCanCreateOrderWithoutUserAccount() {
+        SecurityContextHolder.clearContext();
+
+        OrderRequestDTO request = requestFor(1);
+        var response = orderService.createOrder(request);
+
+        assertEquals(new BigDecimal("12.50"), response.getTotalAmount());
+        assertEquals(1, productRepository.findById(product.getId()).orElseThrow().getStockQuantity());
+        assertNull(orderRepository.findById(response.getId()).orElseThrow().getUser());
+    }
+
+    @Test
+    void staleAuthenticatedUserCanStillPlaceGuestOrder() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("missing@example.com", null, List.of()));
+
+        var response = orderService.createOrder(requestFor(1));
+
+        assertNull(orderRepository.findById(response.getId()).orElseThrow().getUser());
+    }
+
+    @Test
     void insufficientStockLeavesStockUnchanged() {
         setAuthentication();
 

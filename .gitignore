@@ -22,6 +22,7 @@ bin/
 
 # Spring Boot
 spring-shell.log
+data/
 
 # Logs
 *.log

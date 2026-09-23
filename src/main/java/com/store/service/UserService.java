@@ -8,6 +8,7 @@ import com.store.entity.User;
 import com.store.exception.ResourceNotFoundException;
 import com.store.mapper.UserMapper;
 import com.store.repository.UserRepository;
+import com.store.repository.OrderRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final OrderRepository orderRepository;
 
     @Transactional(readOnly = true)
     public Page<UserDto> getAllUsers(Pageable pageable) {
@@ -42,15 +44,18 @@ public class UserService {
     @Transactional
     public UserDto createUser(RegisterUserRequest request) {
         log.info("Creating new user with email: {}", request.getEmail());
+        String email = normalizeEmail(request.getEmail());
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email is already in use: " + request.getEmail());
+        if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
+            throw new IllegalArgumentException("Email is already in use: " + email);
         }
 
         User user = userMapper.toEntity(request);
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         User savedUser = userRepository.save(user);
+        orderRepository.claimGuestOrders(email, savedUser);
         log.info("User created successfully with id: {}", savedUser.getId());
 
         return userMapper.toDto(savedUser);
@@ -106,27 +111,36 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserDto getUserByEmail(String email) {
         log.debug("Getting user by email: {}", email);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        String normalizedEmail = normalizeEmail(email);
+        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + normalizedEmail));
         return userMapper.toDto(user);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public User getUserEntityByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        String normalizedEmail = normalizeEmail(email);
+        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + normalizedEmail));
+        orderRepository.claimGuestOrders(normalizedEmail, user);
+        return user;
     }
 
     @Transactional(readOnly = true)
     public boolean verifyCredentials(String email, String password) {
         log.debug("Verifying credentials for user: {}", email);
         try {
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+            String normalizedEmail = normalizeEmail(email);
+            User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + normalizedEmail));
             return passwordEncoder.matches(password, user.getPassword());
         } catch (ResourceNotFoundException e) {
             log.warn("User not found during credential verification: {}", email);
             return false;
         }
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(java.util.Locale.ROOT);
     }
 }

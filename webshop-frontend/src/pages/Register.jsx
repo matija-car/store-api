@@ -23,9 +23,23 @@ export default function Register() {
         setError('');
         setMessage('');
 
+        const name = `${formData.firstName} ${formData.lastName}`.trim();
+        if (!/^[\p{L}][\p{L} .'-]*$/u.test(name) || name.length < 2 || name.length > 100) {
+            setError('Ime i prezime nisu ispravni.');
+            return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formData.email.trim())) {
+            setError('Unesite ispravnu e-mail adresu.');
+            return;
+        }
+        if (formData.password.length < 8 || formData.password.length > 72) {
+            setError('Lozinka mora imati između 8 i 72 znaka.');
+            return;
+        }
+
         const res = await register({
-            name: `${formData.firstName} ${formData.lastName}`.trim(),
-            email: formData.email,
+            name,
+            email: formData.email.trim(),
             password: formData.password,
         });
         if (res.success) {
@@ -61,6 +75,7 @@ export default function Register() {
                         type="text"
                         name="firstName"
                         required
+                        maxLength={50}
                         value={formData.firstName}
                         onChange={handleChange}
                         className="input-field"
@@ -73,6 +88,7 @@ export default function Register() {
                         type="text"
                         name="lastName"
                         required
+                        maxLength={50}
                         value={formData.lastName}
                         onChange={handleChange}
                         className="input-field"
@@ -85,6 +101,8 @@ export default function Register() {
                         type="email"
                         name="email"
                         required
+                        maxLength={254}
+                        autoComplete="email"
                         value={formData.email}
                         onChange={handleChange}
                         className="input-field"
@@ -97,6 +115,9 @@ export default function Register() {
                         type="password"
                         name="password"
                         required
+                        minLength={8}
+                        maxLength={72}
+                        autoComplete="new-password"
                         value={formData.password}
                         onChange={handleChange}
                         className="input-field"

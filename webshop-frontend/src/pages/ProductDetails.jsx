@@ -3,6 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import API from '../api/axios';
 import { useCart } from '../context/CartContext';
 
+const categoryNames = {
+    Electronics: 'Elektronika',
+    Books: 'Knjige',
+    Clothing: 'Odjeća',
+    Furniture: 'Namještaj',
+    Sports: 'Sport',
+};
+
 export default function ProductDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -12,8 +20,10 @@ export default function ProductDetails() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [added, setAdded] = useState(false);
+    const outOfStock = product && (product.stockQuantity ?? 0) <= 0;
 
     const handleAddToCart = () => {
+        if (outOfStock) return;
         addToCart(product);
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);
@@ -64,6 +74,12 @@ export default function ProductDetails() {
                     <div>
                         <p className="eyebrow mb-4">Duhovni dar</p>
                         <h1 className="display-font mb-5 text-4xl font-bold leading-tight text-ink sm:text-5xl">{product.name}</h1>
+                        {product.pieceType === 'ORIGINAL' && (
+                            <span className="mb-4 inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-900">Jedinstveni original</span>
+                        )}
+                        {product.causeEnabled && product.causeDescription && (
+                            <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-burgundy">{product.causeDescription}</div>
+                        )}
                         <p className="mb-8 text-3xl font-bold text-burgundy">
                             {Number(product.price).toFixed(2)} €
                         </p>
@@ -73,14 +89,15 @@ export default function ProductDetails() {
                     </div>
 
                     <div className="mb-8 grid grid-cols-2 gap-3 border-y border-amber-900/10 py-5 text-sm">
-                        <div><p className="text-stone-400">Dostupnost</p><p className="mt-1 font-semibold text-stone-800">{product.stockQuantity === 1 ? 'Jedinstven primjerak' : 'Dostupno za narudžbu'}</p></div>
-                        <div><p className="text-stone-400">Kategorija</p><p className="mt-1 font-semibold text-stone-800">{product.categoryName || 'Umjetnost'}</p></div>
+                        <div><p className="text-stone-400">Dostupnost</p><p className="mt-1 font-semibold text-stone-800">{outOfStock ? 'Rasprodano' : product.stockQuantity === 1 ? 'Jedinstven primjerak' : `Dostupno: ${product.stockQuantity}`}</p></div>
+                        <div><p className="text-stone-400">Kategorija</p><p className="mt-1 font-semibold text-stone-800">{categoryNames[product.categoryName] || product.categoryName || 'Umjetnost'}</p></div>
                     </div>
                     <button
                         onClick={handleAddToCart}
-                        className={`w-full rounded-lg bg-burgundy py-4 font-semibold text-white transition hover:bg-burgundy-dark ${added ? 'scale-[.98] animate-pulse' : ''}`}
+                        disabled={outOfStock}
+                        className={`w-full rounded-lg py-4 font-semibold text-white transition ${outOfStock ? 'cursor-not-allowed bg-stone-400' : 'bg-burgundy hover:bg-burgundy-dark'} ${added ? 'scale-[.98] animate-pulse' : ''}`}
                     >
-                        {added ? 'Dodano' : 'Dodaj u košaricu'}
+                        {outOfStock ? 'Rasprodano' : added ? 'Dodano' : 'Dodaj u košaricu'}
                     </button>
                     {added && <p className="mt-3 rounded-lg bg-cream px-4 py-3 text-center text-sm font-semibold text-burgundy">Dodano u košaricu</p>}
                 </div>

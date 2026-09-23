@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
-    const [email, setEmail] = useState('');
+    const [searchParams] = useSearchParams();
+    const [email, setEmail] = useState(searchParams.get('email') || '');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const { login } = useAuth();
@@ -12,6 +13,15 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) {
+            setError('Unesite ispravnu e-mail adresu.');
+            return;
+        }
+        if (!password || password.length > 72) {
+            setError('Lozinka nije ispravna.');
+            return;
+        }
 
         const res = await login(email, password);
         if (res.success) {
@@ -39,6 +49,8 @@ export default function Login() {
                     <input
                         type="email"
                         required
+                        maxLength={254}
+                        autoComplete="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="input-field"
@@ -50,6 +62,8 @@ export default function Login() {
                     <input
                         type="password"
                         required
+                        maxLength={72}
+                        autoComplete="current-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="input-field"
