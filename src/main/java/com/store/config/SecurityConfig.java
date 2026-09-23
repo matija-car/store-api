@@ -8,6 +8,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -56,6 +58,9 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
                             .requestMatchers(HttpMethod.POST, "/orders/**").authenticated()
                             .requestMatchers(HttpMethod.GET, "/orders").hasRole("ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/orders/me").authenticated()
+                            .requestMatchers(HttpMethod.GET, "/orders/*").authenticated()
+                            .requestMatchers(HttpMethod.PATCH, "/orders/*/status").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.POST, "/products/**").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")

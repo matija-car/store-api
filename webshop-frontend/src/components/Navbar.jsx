@@ -28,7 +28,9 @@ export default function Navbar() {
                     <Link to="/" className={`${isActive('/') ? 'text-burgundy' : ''} hover:text-burgundy`}>Početna</Link>
                     <a href="/#collection" className="hover:text-burgundy">Proizvodi</a>
                     <a href="/#about" className="hover:text-burgundy">O nama</a>
+                    {user && <Link to="/orders" className="hover:text-burgundy">Moje narudžbe</Link>}
                     {user?.role === 'ADMIN' && <Link to="/admin/products" className="hover:text-burgundy">Admin katalog</Link>}
+                    {user?.role === 'ADMIN' && <Link to="/admin/orders" className="hover:text-burgundy">Upravljanje narudžbama</Link>}
                 </div>
                 <button className="rounded-lg p-2 text-ink md:hidden" onClick={() => setOpen(!open)} aria-label="Otvori izbornik">
                     <span className="text-2xl">{open ? '×' : '☰'}</span>
@@ -51,7 +53,7 @@ export default function Navbar() {
                 <Link to="/" onClick={() => setOpen(false)} className="px-2 py-2 text-sm font-semibold">Početna</Link>
                 <a href="/#collection" onClick={() => setOpen(false)} className="px-2 py-2 text-sm font-semibold">Proizvodi</a>
                 <Link to="/cart" onClick={() => setOpen(false)} className="px-2 py-2 text-sm font-semibold">Košarica ({cart.length})</Link>
-                {user ? <><span className="px-2 py-2 text-sm font-semibold text-burgundy">{user.name || user.email}</span>{user.role === 'ADMIN' && <Link to="/admin/products" onClick={() => setOpen(false)} className="px-2 py-2 text-sm font-semibold">Admin katalog</Link>}<button onClick={logout} className="px-2 py-2 text-left text-sm font-semibold">Odjava</button></> : <Link to="/login" onClick={() => setOpen(false)} className="px-2 py-2 text-sm font-semibold">Prijava</Link>}
+                {user ? <><span className="px-2 py-2 text-sm font-semibold text-burgundy">{user.name || user.email}</span><Link to="/orders" onClick={() => setOpen(false)} className="px-2 py-2 text-sm font-semibold">Moje narudžbe</Link>{user.role === 'ADMIN' && <><Link to="/admin/products" onClick={() => setOpen(false)} className="px-2 py-2 text-sm font-semibold">Admin katalog</Link><Link to="/admin/orders" onClick={() => setOpen(false)} className="px-2 py-2 text-sm font-semibold">Upravljanje narudžbama</Link></>}<button onClick={logout} className="px-2 py-2 text-left text-sm font-semibold">Odjava</button></> : <Link to="/login" onClick={() => setOpen(false)} className="px-2 py-2 text-sm font-semibold">Prijava</Link>}
             </div>
         </nav>
         </>

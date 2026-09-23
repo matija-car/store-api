@@ -5,6 +5,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.store.entity.OrderStatus;
 
 @Getter
 @Setter
@@ -19,7 +20,7 @@ public class OrderResponseDTO {
     private String city;
     private String postalCode;
     private BigDecimal totalAmount;
-    private String status;
+    private OrderStatus status;
     private LocalDateTime createdAt;
     private List<OrderItemResponseDTO> items;
 

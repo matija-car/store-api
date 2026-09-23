@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
 
 @Service
 @Transactional
@@ -26,10 +27,20 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Page<ProductDto> getAllProducts(Number categoryId, Pageable pageable) {
-        if (categoryId != null) {
-            return productRepository.findByCategoryId(categoryId.longValue(), pageable).map(this::mapToDto);
-        }
-        return productRepository.findAll(pageable).map(this::mapToDto);
+        return getAllProducts(null, categoryId, null, null, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductDto> getAllProducts(
+            String search,
+            Number categoryId,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            Pageable pageable) {
+        String normalizedSearch = search == null || search.isBlank() ? null : search.trim();
+        Long normalizedCategoryId = categoryId == null ? null : categoryId.longValue();
+        return productRepository.search(normalizedSearch, normalizedCategoryId, minPrice, maxPrice, pageable)
+                .map(this::mapToDto);
     }
 
     public ProductDto getProductById(Long id) {

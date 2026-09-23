@@ -116,6 +116,25 @@ class ProductServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("Should filter products by search and price range with pagination")
+    void testSearchPriceRangeAndPagination() {
+        productService.createProduct(productDto);
+        productService.createProduct(new ProductDto(null, "Laptop Stand", new BigDecimal("79.99"),
+                "Stand", category.getId()));
+        productService.createProduct(new ProductDto(null, "Desk Lamp", new BigDecimal("19.99"),
+                "Lamp", category.getId()));
+
+        Page<ProductDto> productsPage = productService.getAllProducts(
+                "lApToP", category.getId(), new BigDecimal("50.00"), new BigDecimal("100.00"),
+                PageRequest.of(0, 1));
+
+        assertEquals(1, productsPage.getContent().size());
+        assertEquals("Laptop Stand", productsPage.getContent().get(0).getName());
+        assertEquals(1, productsPage.getTotalElements());
+        assertEquals(1, productsPage.getTotalPages());
+    }
+
+    @Test
     @DisplayName("Should get product by id")
     void testGetProductById() {
         ProductDto createdProduct = productService.createProduct(productDto);

@@ -3,6 +3,7 @@ package com.store.service;
 import com.store.dto.OrderItemRequestDTO;
 import com.store.dto.OrderRequestDTO;
 import com.store.entity.Category;
+import com.store.entity.OrderStatus;
 import com.store.entity.Product;
 import com.store.entity.Role;
 import com.store.entity.User;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -101,6 +103,53 @@ class OrderServiceIntegrationTest {
 
         assertEquals(1, successes);
         assertEquals(0, productRepository.findById(product.getId()).orElseThrow().getStockQuantity());
+    }
+
+    @Test
+    void userCanListOnlyTheirOwnOrders() {
+        setAuthentication();
+        var ownOrder = orderService.createOrder(requestFor(1));
+
+        PageRequest pageRequest = PageRequest.of(0, 20);
+        var orders = orderService.getMyOrders(user.getEmail(), pageRequest);
+
+        assertEquals(1, orders.getTotalElements());
+        assertEquals(ownOrder.getId(), orders.getContent().get(0).getId());
+    }
+
+    @Test
+    void userCannotFetchAnotherUsersOrder() {
+        setAuthentication();
+        var ownOrder = orderService.createOrder(requestFor(1));
+
+        User otherUser = userRepository.save(User.builder()
+                .name("Other User")
+                .email("other-" + UUID.randomUUID() + "@example.com")
+                .password("encoded")
+                .role(Role.CUSTOMER)
+                .build());
+
+        assertThrows(org.springframework.security.access.AccessDeniedException.class,
+                () -> orderService.getOrderById(ownOrder.getId(), otherUser.getEmail(), false));
+    }
+
+    @Test
+    void adminCanListAllOrders() {
+        setAuthentication();
+        orderService.createOrder(requestFor(1));
+
+        var orders = orderService.getAllOrders(null, PageRequest.of(0, 20));
+
+        assertTrue(orders.getTotalElements() >= 1);
+    }
+
+    @Test
+    void invalidStatusTransitionIsRejected() {
+        setAuthentication();
+        var order = orderService.createOrder(requestFor(1));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> orderService.updateStatus(order.getId(), OrderStatus.SHIPPED));
     }
 
     private OrderRequestDTO requestFor(int quantity) {
