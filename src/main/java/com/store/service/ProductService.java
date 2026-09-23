@@ -27,7 +27,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Page<ProductDto> getAllProducts(Number categoryId, Pageable pageable) {
-        return getAllProducts(null, categoryId, null, null, pageable);
+        return getAllProducts(null, categoryId, null, null, false, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -37,15 +37,29 @@ public class ProductService {
             BigDecimal minPrice,
             BigDecimal maxPrice,
             Pageable pageable) {
+        return getAllProducts(search, categoryId, minPrice, maxPrice, false, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductDto> getAllProducts(
+            String search,
+            Number categoryId,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            boolean includeInactive,
+            Pageable pageable) {
         String normalizedSearch = search == null || search.isBlank() ? null : search.trim();
         Long normalizedCategoryId = categoryId == null ? null : categoryId.longValue();
-        return productRepository.search(normalizedSearch, normalizedCategoryId, minPrice, maxPrice, pageable)
+        return productRepository.search(normalizedSearch, normalizedCategoryId, minPrice, maxPrice, includeInactive, pageable)
                 .map(this::mapToDto);
     }
 
     public ProductDto getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        if (!product.isActive()) {
+            throw new ResourceNotFoundException("Product not found with id: " + id);
+        }
         return mapToDto(product);
     }
 
@@ -98,10 +112,17 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
-        if (!productRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Product not found with id: " + id);
-        }
-        productRepository.deleteById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        product.setActive(false);
+        productRepository.save(product);
+    }
+
+    public void restoreProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        product.setActive(true);
+        productRepository.save(product);
     }
 
     private ProductDto mapToDto(Product product) {
@@ -111,6 +132,7 @@ public class ProductService {
         dto.setDescription(product.getDescription());
         dto.setPrice(product.getPrice());
         dto.setStockQuantity(product.getStockQuantity());
+        dto.setActive(product.isActive());
         dto.setImageUrl(product.getImageUrl());
         dto.setPieceType(product.getPieceType() == null ? com.store.entity.PieceType.PRINT : product.getPieceType());
         dto.setCauseEnabled(product.isCauseEnabled());

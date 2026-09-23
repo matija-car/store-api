@@ -25,7 +25,7 @@ export default function AdminProducts() {
 
     const loadProducts = async () => {
         try {
-            const response = await API.get('/products');
+            const response = await API.get('/products?includeInactive=true');
             setProducts(Array.isArray(response.data) ? response.data : response.data.content || []);
         } catch {
             setError('Proizvode nije moguće učitati.');
@@ -96,12 +96,22 @@ export default function AdminProducts() {
     };
 
     const deleteProduct = async (id) => {
-        if (!window.confirm('Obrisati ovaj proizvod?')) return;
+        if (!window.confirm('Maknuti ovaj proizvod iz javne ponude?')) return;
         try {
             await API.delete(`/products/${id}`);
             setProducts((current) => current.filter((product) => product.id !== id));
         } catch (requestError) {
             setError(requestError.response?.data?.message || 'Brisanje proizvoda nije uspjelo.');
+        }
+    };
+
+    const restoreProduct = async (id) => {
+        try {
+            await API.post(`/products/${id}/restore`);
+            setMessage('Proizvod je vraćen u ponudu.');
+            await loadProducts();
+        } catch (requestError) {
+            setError(requestError.response?.data?.message || 'Vraćanje proizvoda nije uspjelo.');
         }
     };
 
@@ -154,14 +164,18 @@ export default function AdminProducts() {
             <div className="overflow-hidden rounded-2xl border border-amber-900/10 bg-white">
                 <div className="grid gap-4 p-5">
                     {products.map((product) => (
-                        <div key={product.id} className="flex flex-col justify-between gap-4 border-b border-stone-100 pb-4 last:border-0 last:pb-0 sm:flex-row sm:items-center">
+                        <div key={product.id} className={`flex flex-col justify-between gap-4 border-b border-stone-100 pb-4 last:border-0 last:pb-0 sm:flex-row sm:items-center ${product.active === false ? 'opacity-60' : ''}`}>
                             <div>
                                 <h2 className="font-semibold text-ink">{product.name}</h2>
-                                <p className="text-sm text-stone-500">{Number(product.price).toFixed(2)} € · Zaliha: {product.stockQuantity ?? 0}</p>
+                                <p className="text-sm text-stone-500">{Number(product.price).toFixed(2)} € · Zaliha: {product.stockQuantity ?? 0} · {product.active === false ? 'Maknuto iz ponude' : 'Aktivno'}</p>
                             </div>
                             <div className="flex gap-2">
                                 <button className="rounded-lg border border-burgundy/30 px-3 py-2 text-sm font-semibold text-burgundy" onClick={() => editProduct(product)}>Uredi</button>
-                                <button className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700" onClick={() => deleteProduct(product.id)}>Obriši</button>
+                                {product.active === false ? (
+                                    <button className="rounded-lg border border-green-200 px-3 py-2 text-sm font-semibold text-green-700" onClick={() => restoreProduct(product.id)}>Vrati u ponudu</button>
+                                ) : (
+                                    <button className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700" onClick={() => deleteProduct(product.id)}>Makni iz ponude</button>
+                                )}
                             </div>
                         </div>
                     ))}

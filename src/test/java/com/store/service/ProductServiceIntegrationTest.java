@@ -175,11 +175,15 @@ class ProductServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("Should delete product successfully")
+    @DisplayName("Should archive product successfully")
     void testDeleteProduct() {
         ProductDto createdProduct = productService.createProduct(productDto);
         productService.deleteProduct(createdProduct.getId());
-        assertFalse(productRepository.existsById(createdProduct.getId()));
+        Product archivedProduct = productRepository.findById(createdProduct.getId()).orElseThrow();
+        assertFalse(archivedProduct.isActive());
+
+        productService.restoreProduct(createdProduct.getId());
+        assertTrue(productRepository.findById(createdProduct.getId()).orElseThrow().isActive());
     }
 
     @Test

@@ -18,7 +18,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("""
             select p from Product p
-            where (:name is null or lower(p.name) like lower(concat('%', :name, '%')))
+            where (:includeInactive = true or p.active = true)
+              and (:name is null or lower(p.name) like lower(concat('%', :name, '%')))
               and (:categoryId is null or p.category.id = :categoryId)
               and (:minPrice is null or p.price >= :minPrice)
               and (:maxPrice is null or p.price <= :maxPrice)
@@ -28,6 +29,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @org.springframework.data.repository.query.Param("categoryId") Long categoryId,
             @org.springframework.data.repository.query.Param("minPrice") BigDecimal minPrice,
             @org.springframework.data.repository.query.Param("maxPrice") BigDecimal maxPrice,
+            @org.springframework.data.repository.query.Param("includeInactive") boolean includeInactive,
             Pageable pageable);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

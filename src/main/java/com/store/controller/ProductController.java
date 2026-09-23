@@ -28,11 +28,12 @@ public class ProductController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "false") boolean includeInactive,
             Pageable pageable) {
         if ((search == null || search.isBlank()) && minPrice == null && maxPrice == null) {
-            return ResponseEntity.ok(productService.getAllProducts(categoryId, pageable));
+            return ResponseEntity.ok(productService.getAllProducts(null, categoryId, null, null, includeInactive, pageable));
         }
-        return ResponseEntity.ok(productService.getAllProducts(search, categoryId, minPrice, maxPrice, pageable));
+        return ResponseEntity.ok(productService.getAllProducts(search, categoryId, minPrice, maxPrice, includeInactive, pageable));
     }
 
     @GetMapping("/{id}")
@@ -57,6 +58,12 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/restore")
+    public ResponseEntity<Void> restoreProduct(@PathVariable Long id) {
+        productService.restoreProduct(id);
         return ResponseEntity.noContent().build();
     }
 }
